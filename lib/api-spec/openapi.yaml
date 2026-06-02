@@ -1,0 +1,427 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Shadow IT Detector API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication
+  - name: apps
+    description: Discovered OAuth apps
+  - name: scans
+    description: Scan operations
+  - name: dashboard
+    description: Dashboard summaries
+  - name: billing
+    description: Billing and subscriptions
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current authenticated user
+      responses:
+        "200":
+          description: Current user info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrentUser"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Log out current user
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /apps:
+    get:
+      operationId: listApps
+      tags: [apps]
+      summary: List all discovered OAuth apps for the organization
+      parameters:
+        - name: risk
+          in: query
+          schema:
+            type: string
+            enum: [high, medium, low, all]
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of OAuth apps
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OAuthApp"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /apps/{appId}:
+    get:
+      operationId: getApp
+      tags: [apps]
+      summary: Get details of a specific OAuth app
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OAuth app details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OAuthAppDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /apps/{appId}/dismiss:
+    post:
+      operationId: dismissApp
+      tags: [apps]
+      summary: Mark an app as reviewed/approved
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: App dismissed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OAuthApp"
+
+  /scans:
+    get:
+      operationId: listScans
+      tags: [scans]
+      summary: List scan history
+      responses:
+        "200":
+          description: List of scans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Scan"
+
+  /scans/trigger:
+    post:
+      operationId: triggerScan
+      tags: [scans]
+      summary: Trigger a new scan of Google Workspace OAuth apps
+      responses:
+        "200":
+          description: Scan started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Scan"
+        "402":
+          description: Subscription required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary stats
+      responses:
+        "200":
+          description: Summary statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/new-apps:
+    get:
+      operationId: getNewApps
+      tags: [dashboard]
+      summary: Get apps discovered in the last scan
+      responses:
+        "200":
+          description: Recently discovered apps
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OAuthApp"
+
+  /billing/checkout:
+    post:
+      operationId: createCheckout
+      tags: [billing]
+      summary: Create a Stripe checkout session
+      responses:
+        "200":
+          description: Checkout URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutSession"
+
+  /billing/portal:
+    post:
+      operationId: createBillingPortal
+      tags: [billing]
+      summary: Create a Stripe customer portal session
+      responses:
+        "200":
+          description: Portal URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillingPortal"
+
+  /billing/status:
+    get:
+      operationId: getBillingStatus
+      tags: [billing]
+      summary: Get current subscription status
+      responses:
+        "200":
+          description: Subscription status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillingStatus"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required: [status]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+      required: [success]
+
+    CurrentUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        name:
+          type: string
+        picture:
+          type: ["string", "null"]
+        domain:
+          type: string
+        isSubscribed:
+          type: boolean
+        trialEndsAt:
+          type: ["string", "null"]
+      required: [id, email, name, domain, isSubscribed]
+
+    OAuthApp:
+      type: object
+      properties:
+        id:
+          type: integer
+        clientId:
+          type: string
+        appName:
+          type: string
+        category:
+          type: string
+        riskLevel:
+          type: string
+          enum: [high, medium, low]
+        riskScore:
+          type: integer
+        userCount:
+          type: integer
+        scopes:
+          type: array
+          items:
+            type: string
+        isDismissed:
+          type: boolean
+        firstSeenAt:
+          type: string
+        lastSeenAt:
+          type: string
+        iconUrl:
+          type: ["string", "null"]
+      required:
+        - id
+        - clientId
+        - appName
+        - category
+        - riskLevel
+        - riskScore
+        - userCount
+        - scopes
+        - isDismissed
+        - firstSeenAt
+        - lastSeenAt
+
+    OAuthAppDetail:
+      allOf:
+        - $ref: "#/components/schemas/OAuthApp"
+        - type: object
+          properties:
+            authorizedUsers:
+              type: array
+              items:
+                type: string
+            scopeDescriptions:
+              type: array
+              items:
+                type: string
+            riskReasons:
+              type: array
+              items:
+                type: string
+          required: [authorizedUsers, scopeDescriptions, riskReasons]
+
+    Scan:
+      type: object
+      properties:
+        id:
+          type: integer
+        status:
+          type: string
+          enum: [pending, running, completed, failed]
+        appsFound:
+          type: ["integer", "null"]
+        newAppsFound:
+          type: ["integer", "null"]
+        startedAt:
+          type: string
+        completedAt:
+          type: ["string", "null"]
+        errorMessage:
+          type: ["string", "null"]
+      required: [id, status, startedAt]
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalApps:
+          type: integer
+        highRiskApps:
+          type: integer
+        mediumRiskApps:
+          type: integer
+        lowRiskApps:
+          type: integer
+        newAppsThisWeek:
+          type: integer
+        dismissedApps:
+          type: integer
+        lastScanAt:
+          type: ["string", "null"]
+        totalUsers:
+          type: integer
+      required:
+        - totalApps
+        - highRiskApps
+        - mediumRiskApps
+        - lowRiskApps
+        - newAppsThisWeek
+        - dismissedApps
+        - totalUsers
+
+    CheckoutSession:
+      type: object
+      properties:
+        url:
+          type: string
+      required: [url]
+
+    BillingPortal:
+      type: object
+      properties:
+        url:
+          type: string
+      required: [url]
+
+    BillingStatus:
+      type: object
+      properties:
+        isSubscribed:
+          type: boolean
+        plan:
+          type: ["string", "null"]
+        currentPeriodEnd:
+          type: ["string", "null"]
+        cancelAtPeriodEnd:
+          type: boolean
+      required: [isSubscribed, cancelAtPeriodEnd]
