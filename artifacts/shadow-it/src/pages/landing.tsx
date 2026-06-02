@@ -1,6 +1,6 @@
-import { Link } from "wouter";
-import { Shield, Lock, Search, AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Shield, Lock, Search, AlertCircle, ArrowRight, CheckCircle2, Radar } from "lucide-react";
+
+const HUB_URL = "https://micro-saas.it";
 
 export function LandingPage() {
   const handleConnect = () => {
@@ -20,130 +20,129 @@ export function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900">
-      <header className="px-6 py-4 flex items-center justify-between max-w-7xl w-full mx-auto">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-md flex items-center justify-center">
-            <Shield className="w-5 h-5 text-white" />
+    <div className="sg-app-bg min-h-screen flex flex-col font-sans">
+      {/* Header */}
+      <header className="sticky top-0 z-50" style={{ background: "rgba(7,11,26,0.9)", backdropFilter: "blur(20px) saturate(1.8)", WebkitBackdropFilter: "blur(20px) saturate(1.8)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="sg-accent-bar" />
+        <div className="max-w-6xl w-full mx-auto px-6 flex items-center justify-between gap-4 min-h-[56px]">
+          <a href="/" className="flex items-center gap-2.5">
+            <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg,#6366f1,#4338ca)", boxShadow: "0 6px 20px rgba(99,102,241,0.4)" }}>
+              <Radar className="w-5 h-5 text-white" />
+            </span>
+            <span className="flex flex-col leading-none">
+              <span className="font-bold text-lg tracking-tight text-white">ShadowGuard</span>
+              <a href={HUB_URL} className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 hover:text-slate-200">by Micro&nbsp;SaaS</a>
+            </span>
+          </a>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button onClick={handleConnect} className="hidden sm:inline-flex text-sm font-semibold text-slate-300 hover:text-white px-3 py-2 rounded-full transition-colors">Log in</button>
+            {import.meta.env.DEV && (
+              <button onClick={handleDemo} data-testid="demo-button" className="inline-flex items-center text-sm font-semibold text-slate-200 px-4 py-2 rounded-full transition-colors" style={{ border: "1px solid rgba(148,163,184,0.35)" }}>
+                View live demo
+              </button>
+            )}
+            <button onClick={handleConnect} className="inline-flex items-center gap-2 text-sm font-extrabold text-white px-5 py-2.5 rounded-full" style={{ background: "linear-gradient(135deg,#6366f1,#4338ca)", boxShadow: "0 8px 28px rgba(99,102,241,0.4)" }}>
+              Connect Workspace
+            </button>
           </div>
-          <span className="font-bold text-xl tracking-tight">ShadowGuard</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" className="hidden sm:flex" onClick={handleConnect}>Log in</Button>
-          {import.meta.env.DEV && (
-            <Button variant="outline" onClick={handleDemo} data-testid="demo-button">View live demo</Button>
-          )}
-          <Button onClick={handleConnect}>Connect Workspace</Button>
         </div>
       </header>
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="py-20 md:py-32 px-6 text-center max-w-4xl mx-auto">
-          <Badge className="mb-6 bg-blue-100 text-blue-700 hover:bg-blue-100 border-blue-200">
-            Secure your Google Workspace
-          </Badge>
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900 mb-6 leading-tight">
-            Discover the apps your team <br className="hidden md:block"/> is secretly using.
+        {/* Hero */}
+        <section className="sg-fade-up py-20 md:py-32 px-6 text-center max-w-4xl mx-auto">
+          <span className="sg-badge">Google Workspace Security</span>
+          <h1 className="mt-6 mb-6 font-extrabold text-white leading-[1.03]" style={{ fontSize: "clamp(38px,7vw,66px)" }}>
+            Discover the apps your team is{" "}
+            <span className="sg-gradient-text">secretly using.</span>
           </h1>
-          <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
-            Shadow IT is the number one vector for data leaks. We scan your Google Workspace to find every unauthorized OAuth app connected by your employees.
+          <p className="text-lg md:text-xl mx-auto max-w-2xl mb-10" style={{ color: "#cbd5e1", lineHeight: 1.6 }}>
+            Shadow IT is the number one vector for data leaks. ShadowGuard scans your Google
+            Workspace to find every unauthorized OAuth app connected by your employees — scored by risk.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button size="lg" className="h-14 px-8 text-lg" onClick={handleConnect}>
-              Connect Google Workspace <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
+            <button onClick={handleConnect} className="inline-flex items-center justify-center gap-2 h-14 px-8 text-lg font-extrabold text-white rounded-full" style={{ background: "linear-gradient(135deg,#6366f1,#4338ca)", boxShadow: "0 10px 34px rgba(99,102,241,0.45)" }}>
+              Connect Google Workspace <ArrowRight className="w-5 h-5" />
+            </button>
           </div>
-          <p className="mt-4 text-sm text-slate-500">Takes 30 seconds. Read-only access.</p>
+          <p className="mt-4 text-sm" style={{ color: "#94a3b8" }}>Takes 30 seconds. Read-only access.</p>
         </section>
 
         {/* How it works */}
-        <section className="py-20 bg-white border-y border-slate-200">
-          <div className="max-w-7xl mx-auto px-6">
-            <h2 className="text-3xl font-bold text-center mb-16">Clear visibility in three steps</h2>
-            
-            <div className="grid md:grid-cols-3 gap-12">
-              <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-6">
-                  <Lock className="w-8 h-8 text-slate-700" />
+        <section className="py-16 px-6">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-14">Clear visibility in three steps</h2>
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                { icon: Lock, title: "1. Connect securely", text: "Authenticate with your Google Workspace admin account. We only request token read permissions — never write access." },
+                { icon: Search, title: "2. We scan for risks", text: "Our engine analyzes every OAuth token granted by your users, categorizing apps by permissions and risk level." },
+                { icon: AlertCircle, title: "3. Mitigate instantly", text: "Review high-risk applications, see exactly who is using them, and act directly from your dashboard." },
+              ].map((step) => (
+                <div key={step.title} className="sg-glass p-7 text-left">
+                  <span className="inline-flex w-12 h-12 rounded-xl items-center justify-center mb-5" style={{ background: "rgba(99,102,241,0.14)", border: "1px solid rgba(99,102,241,0.3)" }}>
+                    <step.icon className="w-6 h-6" style={{ color: "#a5b4fc" }} />
+                  </span>
+                  <h3 className="text-xl font-bold text-white mb-2">{step.title}</h3>
+                  <p style={{ color: "#cbd5e1", lineHeight: 1.6 }}>{step.text}</p>
                 </div>
-                <h3 className="text-xl font-bold mb-3">1. Connect securely</h3>
-                <p className="text-slate-600">Authenticate with your Google Workspace admin account. We only request audit log and token read permissions.</p>
-              </div>
-              <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-6">
-                  <Search className="w-8 h-8 text-slate-700" />
-                </div>
-                <h3 className="text-xl font-bold mb-3">2. We scan for risks</h3>
-                <p className="text-slate-600">Our engine analyzes every OAuth token granted by your users, categorizing apps by permissions and risk level.</p>
-              </div>
-              <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-6">
-                  <AlertCircle className="w-8 h-8 text-blue-700" />
-                </div>
-                <h3 className="text-xl font-bold mb-3">3. Mitigate instantly</h3>
-                <p className="text-slate-600">Review high-risk applications, see exactly who is using them, and revoke access directly from your dashboard.</p>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
         {/* Pricing */}
-        <section className="py-24 px-6 max-w-7xl mx-auto">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Simple, transparent pricing</h2>
-            <p className="text-xl text-slate-600">Protect your entire organization for one flat monthly rate.</p>
+        <section className="py-20 px-6">
+          <div className="max-w-3xl mx-auto text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">Simple, transparent pricing</h2>
+            <p className="text-lg" style={{ color: "#94a3b8" }}>Protect your entire organization for one flat monthly rate — no per-user fees.</p>
           </div>
 
-          <div className="max-w-lg mx-auto bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
-            <div className="p-8 border-b border-slate-100 text-center">
-              <h3 className="text-2xl font-bold mb-2">Pro Plan</h3>
-              <div className="flex items-baseline justify-center gap-1 mb-2">
-                <span className="text-5xl font-extrabold">€39</span>
-                <span className="text-slate-500 font-medium">/month</span>
+          <div className="sg-glass max-w-lg mx-auto overflow-hidden">
+            <div className="p-8 text-center" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+              <span className="sg-badge mb-4">Pro Plan</span>
+              <div className="flex items-baseline justify-center gap-1 mt-4 mb-2">
+                <span className="text-6xl font-extrabold sg-gradient-text">€39</span>
+                <span className="font-medium" style={{ color: "#94a3b8" }}>/month</span>
               </div>
-              <p className="text-slate-500">Unlimited users, unlimited scans.</p>
+              <p style={{ color: "#94a3b8" }}>Unlimited users, unlimited scans.</p>
             </div>
-            <div className="p-8 bg-slate-50">
+            <div className="p-8">
               <ul className="space-y-4 mb-8">
                 {[
                   "Daily automated background scans",
                   "High-risk application alerts",
-                  "Detailed scope analysis",
-                  "1-click access revocation",
-                  "Exportable compliance reports",
-                  "Priority support"
-                ].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />
-                    <span className="text-slate-700 font-medium">{feature}</span>
+                  "Detailed OAuth scope analysis",
+                  "Per-app authorized users breakdown",
+                  "Exportable compliance reports (CSV)",
+                  "Priority support",
+                ].map((feature) => (
+                  <li key={feature} className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 shrink-0" style={{ color: "#22d3ee" }} />
+                    <span className="font-medium" style={{ color: "#e2e8f0" }}>{feature}</span>
                   </li>
                 ))}
               </ul>
-              <Button className="w-full h-12 text-lg" onClick={handleConnect}>Start 14-day free trial</Button>
+              <button onClick={handleConnect} className="w-full h-12 text-lg font-extrabold text-white rounded-full" style={{ background: "linear-gradient(135deg,#6366f1,#4338ca)", boxShadow: "0 8px 28px rgba(99,102,241,0.4)" }}>
+                Start 14-day free trial
+              </button>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="bg-slate-900 text-slate-400 py-12 text-center border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between">
-          <div className="flex items-center gap-2 mb-4 md:mb-0">
-            <Shield className="w-5 h-5 text-slate-500" />
-            <span className="font-bold text-slate-300">ShadowGuard</span>
+      {/* Footer */}
+      <footer className="py-12 px-6" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <Shield className="w-5 h-5" style={{ color: "#818cf8" }} />
+            <span className="font-bold text-slate-200">ShadowGuard</span>
           </div>
-          <p className="text-sm">© 2025 ShadowGuard Security. All rights reserved.</p>
+          <p className="text-sm" style={{ color: "#64748b" }}>
+            © {new Date().getFullYear()} ShadowGuard — a{" "}
+            <a href={HUB_URL} className="font-semibold hover:underline" style={{ color: "#a5b4fc" }}>Micro&nbsp;SaaS</a>{" "}product.
+          </p>
         </div>
       </footer>
     </div>
-  );
-}
-
-// Inline badge for landing page to avoid layout import conflict
-function Badge({ children, className }: { children: React.ReactNode, className?: string }) {
-  return (
-    <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold ${className}`}>
-      {children}
-    </span>
   );
 }

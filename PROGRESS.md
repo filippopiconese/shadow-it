@@ -6,6 +6,24 @@ Legenda: ✅ fatto · 🔄 in corso · ⬜ da fare
 
 ---
 
+## Rebrand — allineamento all'hub Micro SaaS ✅ (2026-06-03)
+
+A regime il sito sarà **shadowit.micro-saas.it**: lo stile ora segue il sito padre
+[micro-saas.it](https://micro-saas.it).
+
+- ✅ Token di brand in `index.css`: font **Barlow Condensed** (titoli) + **Inter** (testo),
+  `--primary` indigo `#6366f1`, ring indigo, chart palette coerente (high=rosso,
+  medium=ambra, low=verde, +indigo/cyan). Classi brand `.sg-app-bg`, `.sg-glass`,
+  `.sg-badge`, `.sg-gradient-text`, `.sg-accent-bar`.
+- ✅ **Landing page** ridisegnata in dark-navy come l'hub: glow indigo/cyan, hero con
+  titolo gradient, card glass, CTA a pillola, pricing glass, badge "by Micro SaaS"
+  e footer con link all'hub.
+- ✅ App (sidebar/layout) allineata: logo Radar su gradiente indigo, sidebar navy,
+  accento indigo, "by Micro SaaS". Pagina `connect` in dark-navy glass.
+- ✅ Verifica visiva (screenshot landing + dashboard) ok; typecheck + build puliti.
+
+---
+
 ## Sprint 0 — Scaffold Replit + abilitazione dev locale ✅ (2026-06-02)
 
 Base generata su Replit e resa eseguibile in locale su Windows.

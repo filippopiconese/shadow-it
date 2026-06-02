@@ -12,6 +12,8 @@ low) in base alla sensibilità degli scope OAuth richiesti.
 - Target: €300–500 MRR.
 
 > Fa parte dell'[hub di micro-SaaS](../micro-saas/) verticali a subscription.
+> A regime sarà su **shadowit.micro-saas.it**; lo stile (dark-navy, indigo/cyan,
+> Barlow Condensed + Inter, card glass) segue il sito padre [micro-saas.it](https://micro-saas.it).
 
 ---
 
