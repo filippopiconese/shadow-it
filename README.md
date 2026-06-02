@@ -129,7 +129,8 @@ Per il billing reale servono inoltre le chiavi Stripe (vedi `.env.example`).
 ```
 artifacts/
   api-server/     Express: routes/ (auth, apps, scans, dashboard, billing, dev)
-                  lib/ (google, stripe, risk, session, logger), env, build.mjs
+                  lib/ (google, stripe, risk, session, logger,
+                        scan-service, scheduler, email), env, build.mjs
   shadow-it/      Frontend React/Vite (pages/, components/)
 lib/
   api-spec/       openapi.yaml (fonte di verità) + config Orval
@@ -142,14 +143,40 @@ docker-compose.yml  Postgres locale
 
 ---
 
+## Scansioni automatiche & alert
+
+- **Scheduler**: l'API esegue scansioni automatiche di ogni workspace connesso
+  (con abbonamento attivo/trial) ogni `SCAN_INTERVAL_HOURS` (default 24h). I token
+  Google scaduti vengono rinfrescati automaticamente prima di ogni scansione.
+  Disattivabile con `ENABLE_SCHEDULER=false`.
+- **Alert email**: alla scoperta di nuove app ad alto rischio, gli admin dell'org
+  ricevono un riepilogo via email. Con SMTP configurato (`SMTP_*`) l'email viene
+  inviata; senza SMTP l'alert viene loggato (utile in dev).
+
+## Deploy self-hosted (single-server)
+
+In produzione l'API può servire direttamente il frontend buildato:
+
+```bash
+pnpm build                       # typecheck + build di tutti i package
+NODE_ENV=production \
+APP_URL=https://tuodominio \
+DATABASE_URL=... SESSION_SECRET=... \
+GOOGLE_CLIENT_ID=... GOOGLE_CLIENT_SECRET=... \
+node artifacts/api-server/dist/index.mjs
+```
+
+L'API rileva `artifacts/shadow-it/dist/public` (override con `STATIC_DIR`) e fa da
+fallback SPA su `index.html`, così le route client (`/dashboard`, `/connect`…)
+funzionano anche dopo un refresh o il redirect OAuth.
+
 ## Note
 
 - Il progetto è stato migrato da Replit a sviluppo locale / self-hosting: rimossi
   i file e i plugin specifici di Replit. Il lockfile è stato esteso ai binari
   nativi `win32-x64` (esbuild, rollup, lightningcss, oxide) in `pnpm-workspace.yaml`.
-- La route **`/api/dev/login`** (seed demo + bypass auth) è montata **solo** se
-  `NODE_ENV !== "production"`. Non viene mai esposta in produzione.
-- ⚠️ Per il deploy self-hosted manca ancora lo static-serving del frontend
-  buildato dall'API (vedi Sprint 1 in PROGRESS.md).
+- La route **`/api/dev/login`** (seed demo + bypass auth), **`/api/dev/run-scheduler`**
+  e **`/api/dev/test-alert`** sono montate **solo** se `NODE_ENV !== "production"`.
+  Non vengono mai esposte in produzione.
 
 Vedi [PROGRESS.md](PROGRESS.md) per lo stato degli sprint.

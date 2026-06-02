@@ -1,6 +1,7 @@
 import "./env";
 import app from "./app";
 import { logger } from "./lib/logger";
+import { startScheduler } from "./lib/scheduler";
 
 // Default to 8080 locally (matches the Vite dev proxy target).
 const rawPort = process.env["PORT"] ?? "8080";
@@ -18,4 +19,5 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
+  startScheduler();
 });

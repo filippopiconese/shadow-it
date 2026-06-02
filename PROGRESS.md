@@ -37,24 +37,33 @@ Base generata su Replit e resa eseguibile in locale su Windows.
 
 ---
 
-## Sprint 1 — Scansione reale & flusso OAuth self-hosted 🔄
+## Sprint 1 — Scansione reale & flusso OAuth self-hosted ✅ (2026-06-03)
 
 Obiettivo: far funzionare la scansione su un Workspace reale in self-hosting.
 
-- ⬜ **Servire il frontend buildato dall'API in produzione** (oggi sono due server
-  separati: in dev funziona via proxy Vite, ma in self-hosting `/connect`
-  post-OAuth darebbe 404). Aggiungere static serving + fallback SPA in `app.ts`.
-- ⬜ Rendere il redirect del callback OAuth coerente tra dev (due origin) e prod.
-- ⬜ Refresh automatico dei token Google scaduti durante la scansione
-  (`refreshTokensIfNeeded` esiste ma non è invocato nel flusso di scan).
-- ⬜ Test e2e del flusso reale con un Google Workspace di prova.
-- ⬜ Pulire il commento fuorviante in `connect.tsx` (“simulate” → è lo spinner post-OAuth).
+- ✅ **Static serving + SPA fallback** in `app.ts`: se esiste la build del frontend
+  (`shadow-it/dist/public`, override `STATIC_DIR`) l'API la serve e fa fallback su
+  `index.html` per le route non-`/api` → deploy single-server e `/connect` post-OAuth
+  non dà più 404. In dev (Vite) la dir non esiste e il blocco viene saltato.
+- ✅ Redirect callback OAuth coerente: risolto dal static serving (l'API serve la SPA);
+  redirect URI e URL app derivano da `APP_URL`/`GOOGLE_REDIRECT_URI`.
+- ✅ **Refresh automatico token Google**: estratta la logica di scan in
+  `lib/scan-service.ts`; `getValidAccessToken()` rinfresca e persiste i token in
+  scadenza prima di ogni scansione (manuale o schedulata).
+- ✅ `routes/scans.ts` ora usa `createScan` + `executeScan` (niente più logica duplicata).
+- ✅ Pulito il commento fuorviante in `connect.tsx`.
+- ⬜ Test e2e del flusso reale con un Google Workspace di prova (richiede credenziali).
 
-## Sprint 2 — Differenziatori di prodotto ⬜
+## Sprint 2 — Differenziatori di prodotto 🔄
 
-- ⬜ **Scansioni automatiche schedulate** (cron) — la value prop parla di
-  “scansione automatica” ma oggi è solo manuale.
-- ⬜ **Alert email** alla scoperta di nuove app ad alto rischio.
+- ✅ **Scansioni automatiche schedulate** (`lib/scheduler.ts`): avviate da `index.ts`,
+  intervallo `SCAN_INTERVAL_HOURS` (default 24h), scansionano ogni org connessa con
+  abbonamento attivo/trial; `ENABLE_SCHEDULER=false` per disattivare. Endpoint dev
+  `POST /api/dev/run-scheduler` per trigger manuale.
+- ✅ **Alert email** nuove app high-risk (`lib/email.ts`): dopo ogni scansione invia
+  ai admin dell'org un riepilogo delle nuove app ad alto rischio. Usa SMTP se
+  configurato (`SMTP_*`), altrimenti logga l'alert (testabile senza credenziali).
+  Endpoint dev `POST /api/dev/test-alert`.
 - ⬜ Icone/logo delle app (campo `iconUrl` già presente, non popolato).
 - ⬜ Storico/diff tra scansioni (app comparse/sparite).
 - ⬜ Hardening risk scoring (più scope, app verificate vs non verificate da Google).

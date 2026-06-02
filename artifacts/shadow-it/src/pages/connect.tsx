@@ -6,9 +6,9 @@ export function Connect() {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    // In a real app, this page is where Google redirects to with a code
-    // The backend would handle it, set a cookie, and redirect here
-    // Here we just simulate a brief loading state then go to dashboard
+    // Post-OAuth landing: the backend has already exchanged the code, created
+    // the session cookie, and redirected here. We show a brief "finalizing"
+    // state, then move the user into the dashboard.
     const timer = setTimeout(() => {
       setLocation("/dashboard");
     }, 2000);

@@ -2,6 +2,8 @@ import { Router, type IRouter } from "express";
 import { db, organizationsTable, usersTable, subscriptionsTable, oauthAppsTable, scansTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { categorizeApp, scoreApp } from "../lib/risk";
+import { runDueScans } from "../lib/scheduler";
+import { sendNewHighRiskAppsAlert } from "../lib/email";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -184,6 +186,25 @@ router.post("/dev/login", async (req, res): Promise<void> => {
     logger.error({ err }, "Dev login failed");
     res.status(500).json({ error: String(err) });
   }
+});
+
+// Manually trigger the scheduler tick (dev only).
+router.post("/dev/run-scheduler", async (_req, res): Promise<void> => {
+  const result = await runDueScans();
+  res.json(result);
+});
+
+// Fire a sample high-risk alert for the logged-in org (dev only). Useful to
+// verify the email pipeline without running a real scan.
+router.post("/dev/test-alert", async (req, res): Promise<void> => {
+  if (!req.session.organizationId) {
+    res.status(401).json({ error: "Not authenticated" });
+    return;
+  }
+  await sendNewHighRiskAppsAlert(req.session.organizationId, [
+    { appName: "Some Random Photo Editor", riskScore: 95, userCount: 1 },
+  ]);
+  res.json({ success: true });
 });
 
 export default router;

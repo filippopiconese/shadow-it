@@ -1,8 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { db, scansTable, oauthAppsTable, organizationsTable, subscriptionsTable } from "@workspace/db";
-import { eq, desc, and } from "drizzle-orm";
-import { scanWorkspaceApps, categorizeAndScore } from "../lib/google";
-import { logger } from "../lib/logger";
+import { db, scansTable, organizationsTable, subscriptionsTable } from "@workspace/db";
+import { eq, desc } from "drizzle-orm";
+import { createScan, executeScan } from "../lib/scan-service";
 
 const router: IRouter = Router();
 
@@ -59,15 +58,7 @@ router.post("/scans/trigger", async (req, res): Promise<void> => {
     return;
   }
 
-  const [scan] = await db
-    .insert(scansTable)
-    .values({ organizationId: orgId, status: "running" })
-    .returning();
-
-  if (!scan) {
-    res.status(500).json({ error: "Failed to create scan" });
-    return;
-  }
+  const scan = await createScan(orgId);
 
   res.json({
     id: scan.id,
@@ -79,64 +70,8 @@ router.post("/scans/trigger", async (req, res): Promise<void> => {
     errorMessage: null,
   });
 
-  setImmediate(async () => {
-    try {
-      const discovered = await scanWorkspaceApps(org.accessToken!, org.refreshToken ?? "");
-
-      let appsFound = 0;
-      let newAppsFound = 0;
-
-      for (const app of discovered) {
-        const { category, riskLevel, riskScore } = categorizeAndScore(app);
-
-        const [existing] = await db
-          .select()
-          .from(oauthAppsTable)
-          .where(and(eq(oauthAppsTable.clientId, app.clientId), eq(oauthAppsTable.organizationId, orgId)));
-
-        if (existing) {
-          await db
-            .update(oauthAppsTable)
-            .set({
-              appName: app.appName,
-              scopes: app.scopes,
-              authorizedUsers: app.authorizedUsers,
-              riskLevel,
-              riskScore,
-              category,
-              lastSeenAt: new Date(),
-            })
-            .where(eq(oauthAppsTable.id, existing.id));
-        } else {
-          await db.insert(oauthAppsTable).values({
-            organizationId: orgId,
-            clientId: app.clientId,
-            appName: app.appName,
-            scopes: app.scopes,
-            authorizedUsers: app.authorizedUsers,
-            riskLevel,
-            riskScore,
-            category,
-          });
-          newAppsFound++;
-        }
-        appsFound++;
-      }
-
-      await db
-        .update(scansTable)
-        .set({ status: "completed", appsFound, newAppsFound, completedAt: new Date() })
-        .where(eq(scansTable.id, scan.id));
-
-      logger.info({ scanId: scan.id, appsFound, newAppsFound }, "Scan completed");
-    } catch (err) {
-      logger.error({ err, scanId: scan.id }, "Scan failed");
-      await db
-        .update(scansTable)
-        .set({ status: "failed", errorMessage: String(err), completedAt: new Date() })
-        .where(eq(scansTable.id, scan.id));
-    }
-  });
+  // Run the scan in the background; client polls GET /scans for status.
+  setImmediate(() => executeScan(scan.id, orgId));
 });
 
 export default router;

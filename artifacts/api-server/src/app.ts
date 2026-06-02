@@ -3,6 +3,9 @@ import cors from "cors";
 import pinoHttp from "pino-http";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import { existsSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { createSessionMiddleware } from "./lib/session";
@@ -73,6 +76,21 @@ app.use("/api/scans/trigger", scanLimiter);
 app.use("/api/auth", authLimiter);
 
 app.use("/api", router);
+
+// Serve the built frontend (single-server deploy). In dev the frontend is
+// served by Vite, so dist/public won't exist and this is skipped. The SPA
+// fallback returns index.html for any non-/api route so client-side routes
+// (e.g. /dashboard, /connect) work on a hard refresh / OAuth redirect.
+const here = path.dirname(fileURLToPath(import.meta.url));
+const staticDir = process.env.STATIC_DIR ?? path.resolve(here, "../../shadow-it/dist/public");
+
+if (existsSync(staticDir)) {
+  logger.info({ staticDir }, "Serving built frontend");
+  app.use(express.static(staticDir));
+  app.get(/^\/(?!api\/).*/, (_req: Request, res: Response) => {
+    res.sendFile(path.join(staticDir, "index.html"));
+  });
+}
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: "Not found" });
