@@ -5,23 +5,29 @@ on:
     branches: [main]
   pull_request:
 
+# pnpm/action-setup still targets Node 20; FORCE_JAVASCRIPT_ACTIONS_TO_NODE24
+# runs it on Node 24. This leaves only a HARMLESS informational notice
+# ("being forced to run on Node.js 24") — not an error. Removing the action
+# entirely (npm -g / corepack) broke the build, so we keep this proven-green
+# setup until pnpm ships a Node 24 major of the action.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
+      - name: Setup pnpm
+        # Version comes from the "packageManager" field in package.json.
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: 24
-
-      - name: Enable pnpm via corepack
-        # corepack ships with Node 24 (runs on Node 24, no deprecation notice).
-        # Picks the pnpm version from the "packageManager" field in package.json.
-        run: |
-          corepack enable pnpm
-          pnpm --version
+          cache: pnpm
 
       - name: Install dependencies
         # --ignore-scripts: pnpm 11 exits non-zero in non-TTY over "ignored build
