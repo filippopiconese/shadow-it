@@ -5,26 +5,21 @@ on:
     branches: [main]
   pull_request:
 
-# pnpm/action-setup has no Node 24 major yet; force it (and any other Node 20
-# action) onto Node 24 to clear the deprecation warning.
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
-      - name: Setup pnpm
-        # Version comes from the "packageManager" field in package.json.
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: 24
-          cache: pnpm
+
+      - name: Setup pnpm
+        # Installed via npm (not pnpm/action-setup, which still targets Node 20).
+        # Same version as the Dockerfile.
+        run: npm install -g pnpm@11.5.1
 
       - name: Install dependencies
         # --ignore-scripts: pnpm 11 exits non-zero in non-TTY over "ignored build
