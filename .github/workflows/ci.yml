@@ -22,7 +22,9 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        # --ignore-scripts: pnpm 11 exits non-zero in non-TTY over "ignored build
+        # scripts"; our deps don't need postinstall (prebuilt binaries).
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Typecheck
         run: pnpm run typecheck

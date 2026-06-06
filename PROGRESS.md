@@ -20,6 +20,13 @@ Legenda: ✅ fatto · 🔄 in corso · ⬜ da fare
   `db push-force` + API single-server) + `.dockerignore`; `railway.json` → builder
   DOCKERFILE. **Verificato in locale**: build immagine OK + run in prod (schema
   applicato, health 200, SPA servita, demo on / dev off).
+- ✅ **Fix CI**: `pnpm install --frozen-lockfile --ignore-scripts` (pnpm 11 falliva su
+  "ignored build scripts" in non-TTY); rimosso `version` dall'action (conflitto con
+  `packageManager`); `.npmrc` `verify-deps-before-run=false`.
+- ✅ **Fix runtime Railway**: gestione **SSL automatica** del DB (`lib/db/src/ssl.ts`,
+  on per host pubblici/managed, off per local/`*.railway.internal`; override `DATABASE_SSL`)
+  applicata a pool app + drizzle-kit; **start resiliente** (retry del `db push` finché il
+  DB è raggiungibile, poi avvia comunque il server → niente crash-loop).
 
 ## Hardening pre-produzione + CI ✅ (2026-06-06)
 

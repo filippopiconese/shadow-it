@@ -1,6 +1,7 @@
 import { defineConfig } from "drizzle-kit";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { dbSsl } from "./src/ssl";
 
 // Load repo-root .env for local dev (Node-native, no dependency). No-op on
 // Replit/prod where DATABASE_URL is already set.
@@ -20,5 +21,6 @@ export default defineConfig({
   dialect: "postgresql",
   dbCredentials: {
     url: process.env.DATABASE_URL,
+    ssl: dbSsl(),
   },
 });

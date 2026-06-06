@@ -28,5 +28,6 @@ RUN pnpm --config.verify-deps-before-run=false run build
 
 EXPOSE 8080
 
-# Apply DB schema, then start the API (which serves the built SPA).
-CMD ["sh", "-c", "pnpm --filter @workspace/db run push-force && node artifacts/api-server/dist/index.mjs"]
+# Apply DB schema (retry until the DB is reachable), then start the API.
+# On Railway the deploy.startCommand in railway.json overrides this CMD.
+CMD ["sh", "-c", "for i in 1 2 3 4 5; do pnpm --filter @workspace/db run push-force && break || (echo \"db push attempt $i failed, retrying in 4s...\"; sleep 4); done; node artifacts/api-server/dist/index.mjs"]
