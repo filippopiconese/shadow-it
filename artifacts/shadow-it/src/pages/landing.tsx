@@ -1,6 +1,8 @@
-import { Shield, Lock, Search, AlertCircle, ArrowRight, CheckCircle2, Radar } from "lucide-react";
+import { Lock, Search, AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Logo } from "@/components/logo";
 
-const HUB_URL = "https://micro-saas.it";
+const HUB_URL = "https://www.micro-saas.it";
+const CONTACT_URL = "https://www.micro-saas.it/contatti";
 
 export function LandingPage() {
   const handleConnect = () => {
@@ -25,14 +27,8 @@ export function LandingPage() {
       <header className="sticky top-0 z-50" style={{ background: "rgba(7,11,26,0.9)", backdropFilter: "blur(20px) saturate(1.8)", WebkitBackdropFilter: "blur(20px) saturate(1.8)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
         <div className="sg-accent-bar" />
         <div className="max-w-6xl w-full mx-auto px-6 flex items-center justify-between gap-4 min-h-[56px]">
-          <a href="/" className="flex items-center gap-2.5">
-            <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg,#6366f1,#4338ca)", boxShadow: "0 6px 20px rgba(99,102,241,0.4)" }}>
-              <Radar className="w-5 h-5 text-white" />
-            </span>
-            <span className="flex flex-col leading-none">
-              <span className="font-bold text-lg tracking-tight text-white">ShadowGuard</span>
-              <a href={HUB_URL} className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 hover:text-slate-200">by Micro&nbsp;SaaS</a>
-            </span>
+          <a href="/" className="flex items-center">
+            <Logo size={38} />
           </a>
           <div className="flex items-center gap-2 sm:gap-3">
             <button onClick={handleConnect} className="hidden sm:inline-flex text-sm font-semibold text-slate-300 hover:text-white px-3 py-2 rounded-full transition-colors">Log in</button>
@@ -131,16 +127,33 @@ export function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="py-12 px-6" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5" style={{ color: "#818cf8" }} />
-            <span className="font-bold text-slate-200">ShadowGuard</span>
+      <footer className="pt-14 pb-10 px-6" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className="max-w-6xl mx-auto">
+          <div className="grid gap-8 md:grid-cols-4">
+            <div className="md:col-span-2">
+              <Logo size={44} showSub={false} wordmarkClassName="text-lg text-white" />
+              <p className="mt-4 text-sm max-w-xs" style={{ color: "#94a3b8", lineHeight: 1.6 }}>
+                Visibilità sullo shadow IT del tuo Google Workspace. Una micro-app verticale della famiglia Micro&nbsp;SaaS.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#cbd5e1" }}>Prodotto</h4>
+              <ul className="space-y-2 text-sm" style={{ color: "#94a3b8" }}>
+                <li><button onClick={handleConnect} className="hover:text-slate-200">Connect Workspace</button></li>
+                <li><a href="#pricing" className="hover:text-slate-200">Pricing</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#cbd5e1" }}>Micro SaaS</h4>
+              <ul className="space-y-2 text-sm" style={{ color: "#94a3b8" }}>
+                <li><a href={CONTACT_URL} target="_blank" rel="noopener" className="hover:text-slate-200">Contatti</a></li>
+                <li><a href={HUB_URL} target="_blank" rel="noopener" className="hover:text-slate-200">www.micro-saas.it</a></li>
+              </ul>
+            </div>
           </div>
-          <p className="text-sm" style={{ color: "#64748b" }}>
-            © {new Date().getFullYear()} ShadowGuard — a{" "}
-            <a href={HUB_URL} className="font-semibold hover:underline" style={{ color: "#a5b4fc" }}>Micro&nbsp;SaaS</a>{" "}product.
-          </p>
+          <div className="mt-10 pt-6 text-center text-sm" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", color: "#64748b" }}>
+            © {new Date().getFullYear()} Micro SaaS — Filippo Piconese. All rights reserved.
+          </div>
         </div>
       </footer>
     </div>

@@ -62,6 +62,7 @@ router.get("/apps", async (req, res): Promise<void> => {
       firstSeenAt: a.firstSeenAt.toISOString(),
       lastSeenAt: a.lastSeenAt.toISOString(),
       iconUrl: a.iconUrl ?? null,
+      status: a.status,
     })),
   );
 });
@@ -88,7 +89,7 @@ router.get("/apps/:appId", async (req, res): Promise<void> => {
   }
 
   const scopes = app.scopes ?? [];
-  const { riskReasons } = scoreApp(scopes);
+  const { riskReasons } = scoreApp(scopes, (app.authorizedUsers ?? []).length);
 
   res.json({
     id: app.id,
@@ -103,6 +104,7 @@ router.get("/apps/:appId", async (req, res): Promise<void> => {
     firstSeenAt: app.firstSeenAt.toISOString(),
     lastSeenAt: app.lastSeenAt.toISOString(),
     iconUrl: app.iconUrl ?? null,
+    status: app.status,
     authorizedUsers: app.authorizedUsers ?? [],
     scopeDescriptions: getScopeDescriptions(scopes),
     riskReasons,
@@ -144,6 +146,7 @@ router.post("/apps/:appId/dismiss", async (req, res): Promise<void> => {
     firstSeenAt: app.firstSeenAt.toISOString(),
     lastSeenAt: app.lastSeenAt.toISOString(),
     iconUrl: app.iconUrl ?? null,
+    status: app.status,
   });
 });
 

@@ -4,100 +4,10 @@ import { eq } from "drizzle-orm";
 import { categorizeApp, scoreApp } from "../lib/risk";
 import { runDueScans } from "../lib/scheduler";
 import { sendNewHighRiskAppsAlert } from "../lib/email";
+import { DEMO_DOMAIN, DEMO_APPS } from "../lib/demo-data";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
-
-const DEMO_DOMAIN = "demo-acme.com";
-
-// Realistic-looking OAuth apps an SMB would discover in a real scan. Risk is
-// derived from the scopes via scoreApp() so the demo stays consistent with the
-// production scoring logic.
-const DEMO_APPS: Array<{
-  clientId: string;
-  appName: string;
-  scopes: string[];
-  users: string[];
-  daysAgo: number;
-}> = [
-  {
-    clientId: "100001.apps.googleusercontent.com",
-    appName: "ChatGPT",
-    scopes: ["openid", "email", "profile", "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/gmail.readonly"],
-    users: ["marco.rossi@demo-acme.com", "giulia.bianchi@demo-acme.com", "luca.verdi@demo-acme.com", "sara.neri@demo-acme.com"],
-    daysAgo: 2,
-  },
-  {
-    clientId: "100002.apps.googleusercontent.com",
-    appName: "Grammarly",
-    scopes: ["openid", "email", "profile", "https://www.googleapis.com/auth/gmail.modify"],
-    users: ["marco.rossi@demo-acme.com", "anna.galli@demo-acme.com"],
-    daysAgo: 3,
-  },
-  {
-    clientId: "100003.apps.googleusercontent.com",
-    appName: "Zoom",
-    scopes: ["openid", "email", "profile", "https://www.googleapis.com/auth/calendar"],
-    users: ["marco.rossi@demo-acme.com", "giulia.bianchi@demo-acme.com", "luca.verdi@demo-acme.com", "sara.neri@demo-acme.com", "anna.galli@demo-acme.com", "paolo.conti@demo-acme.com"],
-    daysAgo: 40,
-  },
-  {
-    clientId: "100004.apps.googleusercontent.com",
-    appName: "Slack",
-    scopes: ["openid", "email", "profile", "https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/contacts"],
-    users: ["marco.rossi@demo-acme.com", "giulia.bianchi@demo-acme.com", "luca.verdi@demo-acme.com"],
-    daysAgo: 55,
-  },
-  {
-    clientId: "100005.apps.googleusercontent.com",
-    appName: "Notion",
-    scopes: ["openid", "email", "profile", "https://www.googleapis.com/auth/drive.file"],
-    users: ["sara.neri@demo-acme.com", "paolo.conti@demo-acme.com"],
-    daysAgo: 12,
-  },
-  {
-    clientId: "100006.apps.googleusercontent.com",
-    appName: "Calendly",
-    scopes: ["openid", "email", "profile", "https://www.googleapis.com/auth/calendar"],
-    users: ["giulia.bianchi@demo-acme.com"],
-    daysAgo: 5,
-  },
-  {
-    clientId: "100007.apps.googleusercontent.com",
-    appName: "Superhuman",
-    scopes: ["openid", "email", "profile", "https://mail.google.com/", "https://www.googleapis.com/auth/contacts"],
-    users: ["paolo.conti@demo-acme.com"],
-    daysAgo: 1,
-  },
-  {
-    clientId: "100008.apps.googleusercontent.com",
-    appName: "Loom",
-    scopes: ["openid", "email", "profile"],
-    users: ["luca.verdi@demo-acme.com", "anna.galli@demo-acme.com"],
-    daysAgo: 70,
-  },
-  {
-    clientId: "100009.apps.googleusercontent.com",
-    appName: "HubSpot",
-    scopes: ["openid", "email", "profile", "https://www.googleapis.com/auth/gmail.send", "https://www.googleapis.com/auth/contacts"],
-    users: ["marco.rossi@demo-acme.com", "giulia.bianchi@demo-acme.com"],
-    daysAgo: 4,
-  },
-  {
-    clientId: "100010.apps.googleusercontent.com",
-    appName: "Some Random Photo Editor",
-    scopes: ["openid", "email", "profile", "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"],
-    users: ["sara.neri@demo-acme.com"],
-    daysAgo: 1,
-  },
-  {
-    clientId: "100011.apps.googleusercontent.com",
-    appName: "Trello",
-    scopes: ["openid", "email", "profile"],
-    users: ["luca.verdi@demo-acme.com", "paolo.conti@demo-acme.com", "anna.galli@demo-acme.com"],
-    daysAgo: 90,
-  },
-];
 
 function daysAgoDate(days: number): Date {
   const d = new Date();
@@ -115,9 +25,13 @@ router.post("/dev/login", async (req, res): Promise<void> => {
     if (!org) {
       const inserted = await db
         .insert(organizationsTable)
-        .values({ domain: DEMO_DOMAIN, name: "Acme Corp (Demo)" })
+        // Fake token marks the org as "connected" so Run Scan + the scheduler
+        // work with the mock provider (SCAN_PROVIDER=mock).
+        .values({ domain: DEMO_DOMAIN, name: "Acme Corp (Demo)", accessToken: "mock-token" })
         .returning();
       org = inserted[0]!;
+    } else if (!org.accessToken) {
+      await db.update(organizationsTable).set({ accessToken: "mock-token" }).where(eq(organizationsTable.id, org.id));
     }
 
     let [user] = await db.select().from(usersTable).where(eq(usersTable.googleId, "demo-admin"));
@@ -161,6 +75,7 @@ router.post("/dev/login", async (req, res): Promise<void> => {
         riskScore,
         scopes: app.scopes,
         authorizedUsers: app.users,
+        iconUrl: app.iconUrl,
         firstSeenAt: daysAgoDate(app.daysAgo),
         lastSeenAt: daysAgoDate(0),
       });

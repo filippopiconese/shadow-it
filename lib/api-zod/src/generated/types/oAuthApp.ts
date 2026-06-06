@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { OAuthAppRiskLevel } from './oAuthAppRiskLevel';
+import type { OAuthAppStatus } from './oAuthAppStatus';
 
 export interface OAuthApp {
   id: number;
@@ -21,4 +22,5 @@ export interface OAuthApp {
   lastSeenAt: string;
   /** @nullable */
   iconUrl?: string | null;
+  status: OAuthAppStatus;
 }

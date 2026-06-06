@@ -319,6 +319,9 @@ components:
           type: string
         iconUrl:
           type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, removed]
       required:
         - id
         - clientId
@@ -331,6 +334,7 @@ components:
         - isDismissed
         - firstSeenAt
         - lastSeenAt
+        - status
 
     OAuthAppDetail:
       allOf:
@@ -362,6 +366,8 @@ components:
         appsFound:
           type: ["integer", "null"]
         newAppsFound:
+          type: ["integer", "null"]
+        removedAppsFound:
           type: ["integer", "null"]
         startedAt:
           type: string

@@ -60,6 +60,13 @@ Apri **http://localhost:25255**. In dev compare il pulsante **“View live demo�
 crea un workspace demo con ~11 app OAuth realistiche (rischio misto) e ti porta
 direttamente nella dashboard — **senza bisogno di credenziali Google**.
 
+### Sviluppo senza Google Workspace (mock provider)
+
+Con `SCAN_PROVIDER=mock` (default nel `.env` locale) la scansione usa dati
+sintetici invece dell'Admin SDK: puoi esercitare **tutto il flusso reale** —
+“Run Security Scan”, storico scansioni, scheduler automatico e alert high-risk —
+senza un Google Workspace. Imposta `SCAN_PROVIDER=google` per la scansione vera.
+
 > Il server API carica automaticamente il file `.env` dalla root del repo
 > (loader nativo di Node, nessuna dipendenza). Vite fa da proxy di `/api` verso
 > l'API su `:8080`, così il browser resta same-origin (cookie + redirect OAuth
@@ -98,12 +105,19 @@ direttamente nella dashboard — **senza bisogno di credenziali Google**.
 Il punteggio (0–100) deriva dalla sensibilità degli scope OAuth
 ([`risk.ts`](artifacts/api-server/src/lib/risk.ts)):
 
-- **HIGH** (+70): accesso pieno a Gmail/Drive, admin, cloud-platform, Sheets/Docs…
-- **MEDIUM** (+25): accesso a dati sensibili read-only (email, calendar, contatti).
+- **HIGH** (+70): accesso pieno a Gmail/Drive, admin, cloud-platform, BigQuery,
+  Sheets/Docs, Forms, Keep…
+- **MEDIUM** (+25): accesso a dati sensibili read-only (email, calendar, contatti,
+  tasks, chat, foto…).
 - **+10** se l'app richiede più di 5 scope.
+- **Esposizione** (+8/+15): app autorizzata da molti utenti = blast radius maggiore.
 
 `>= 60 → high`, `>= 25 → medium`, altrimenti `low`. Le app vengono anche
 categorizzate per keyword (AI Tools, Development, Communication, Storage, …).
+
+Ogni scansione calcola anche il **diff** rispetto alle precedenti: le app non più
+autorizzate vengono marcate `removed` (badge "Revoked"), con il conteggio nello
+storico scansioni; la dashboard considera solo le app attive.
 
 ---
 

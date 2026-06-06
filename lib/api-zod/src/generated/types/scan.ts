@@ -14,6 +14,8 @@ export interface Scan {
   appsFound?: number | null;
   /** @nullable */
   newAppsFound?: number | null;
+  /** @nullable */
+  removedAppsFound?: number | null;
   startedAt: string;
   /** @nullable */
   completedAt?: string | null;

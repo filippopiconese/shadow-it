@@ -59,7 +59,8 @@ export const ListAppsResponseItem = zod.object({
   "isDismissed": zod.boolean(),
   "firstSeenAt": zod.string(),
   "lastSeenAt": zod.string(),
-  "iconUrl": zod.string().nullish()
+  "iconUrl": zod.string().nullish(),
+  "status": zod.enum(['active', 'removed'])
 })
 export const ListAppsResponse = zod.array(ListAppsResponseItem)
 
@@ -83,7 +84,8 @@ export const GetAppResponse = zod.object({
   "isDismissed": zod.boolean(),
   "firstSeenAt": zod.string(),
   "lastSeenAt": zod.string(),
-  "iconUrl": zod.string().nullish()
+  "iconUrl": zod.string().nullish(),
+  "status": zod.enum(['active', 'removed'])
 }).and(zod.object({
   "authorizedUsers": zod.array(zod.string()),
   "scopeDescriptions": zod.array(zod.string()),
@@ -110,7 +112,8 @@ export const DismissAppResponse = zod.object({
   "isDismissed": zod.boolean(),
   "firstSeenAt": zod.string(),
   "lastSeenAt": zod.string(),
-  "iconUrl": zod.string().nullish()
+  "iconUrl": zod.string().nullish(),
+  "status": zod.enum(['active', 'removed'])
 })
 
 
@@ -122,6 +125,7 @@ export const ListScansResponseItem = zod.object({
   "status": zod.enum(['pending', 'running', 'completed', 'failed']),
   "appsFound": zod.number().nullish(),
   "newAppsFound": zod.number().nullish(),
+  "removedAppsFound": zod.number().nullish(),
   "startedAt": zod.string(),
   "completedAt": zod.string().nullish(),
   "errorMessage": zod.string().nullish()
@@ -137,6 +141,7 @@ export const TriggerScanResponse = zod.object({
   "status": zod.enum(['pending', 'running', 'completed', 'failed']),
   "appsFound": zod.number().nullish(),
   "newAppsFound": zod.number().nullish(),
+  "removedAppsFound": zod.number().nullish(),
   "startedAt": zod.string(),
   "completedAt": zod.string().nullish(),
   "errorMessage": zod.string().nullish()
@@ -173,7 +178,8 @@ export const GetNewAppsResponseItem = zod.object({
   "isDismissed": zod.boolean(),
   "firstSeenAt": zod.string(),
   "lastSeenAt": zod.string(),
-  "iconUrl": zod.string().nullish()
+  "iconUrl": zod.string().nullish(),
+  "status": zod.enum(['active', 'removed'])
 })
 export const GetNewAppsResponse = zod.array(GetNewAppsResponseItem)
 

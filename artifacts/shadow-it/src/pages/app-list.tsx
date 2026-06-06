@@ -180,7 +180,7 @@ export function AppList() {
             </div>
             {displayed.map((app) => (
               <Link key={app.id} href={`/apps/${app.id}`}>
-                <div className={`grid grid-cols-12 gap-4 p-4 items-center hover:bg-slate-50 transition-colors cursor-pointer group ${app.isDismissed ? "opacity-60" : ""}`}>
+                <div className={`grid grid-cols-12 gap-4 p-4 items-center hover:bg-slate-50 transition-colors cursor-pointer group ${app.isDismissed || app.status === "removed" ? "opacity-60" : ""}`}>
                   <div className="col-span-5 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg border border-slate-200 bg-white flex items-center justify-center shrink-0">
                       {app.iconUrl ? (
@@ -192,6 +192,9 @@ export function AppList() {
                     <div className="min-w-0">
                       <div className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors truncate flex items-center gap-2">
                         {app.appName}
+                        {app.status === "removed" && (
+                          <Badge variant="outline" className="text-xs text-amber-600 border-amber-200 bg-amber-50 font-normal py-0 px-1.5">Revoked</Badge>
+                        )}
                         {app.isDismissed && (
                           <Badge variant="outline" className="text-xs text-slate-400 border-slate-200 font-normal py-0 px-1.5">Reviewed</Badge>
                         )}

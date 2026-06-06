@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "wouter";
-import { Radar, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 export function Connect() {
   const [, setLocation] = useLocation();
@@ -19,8 +19,8 @@ export function Connect() {
   return (
     <div className="sg-app-bg min-h-screen flex items-center justify-center p-4">
       <div className="sg-glass max-w-md w-full p-8 text-center animate-in zoom-in-95 duration-500">
-        <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 relative" style={{ background: "rgba(99,102,241,0.14)", border: "1px solid rgba(99,102,241,0.3)" }}>
-          <Radar className="w-8 h-8 relative z-10" style={{ color: "#a5b4fc" }} />
+        <div className="w-20 h-20 flex items-center justify-center mx-auto mb-6 relative">
+          <img src="/logo-icon.png" alt="Micro SaaS" className="w-14 h-14 object-contain relative z-10" />
           <div className="absolute inset-0 opacity-20 rounded-2xl animate-ping" style={{ background: "#6366f1" }}></div>
         </div>
 

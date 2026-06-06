@@ -16,10 +16,13 @@ router.get("/dashboard/summary", async (req, res): Promise<void> => {
   if (!requireAuth(req, res)) return;
   const orgId = req.session.organizationId!;
 
-  const apps = await db
+  const allApps = await db
     .select()
     .from(oauthAppsTable)
     .where(eq(oauthAppsTable.organizationId, orgId));
+
+  // Dashboard reflects currently-authorized apps; revoked ones are excluded.
+  const apps = allApps.filter((a) => a.status !== "removed");
 
   const totalApps = apps.length;
   const highRiskApps = apps.filter((a) => a.riskLevel === "high").length;

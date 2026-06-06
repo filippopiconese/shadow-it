@@ -38,6 +38,14 @@ export const OAuthAppRiskLevel = {
   low: 'low',
 } as const;
 
+export type OAuthAppStatus = typeof OAuthAppStatus[keyof typeof OAuthAppStatus];
+
+
+export const OAuthAppStatus = {
+  active: 'active',
+  removed: 'removed',
+} as const;
+
 export interface OAuthApp {
   id: number;
   clientId: string;
@@ -52,6 +60,7 @@ export interface OAuthApp {
   lastSeenAt: string;
   /** @nullable */
   iconUrl?: string | null;
+  status: OAuthAppStatus;
 }
 
 export type OAuthAppDetail = OAuthApp & {
@@ -77,6 +86,8 @@ export interface Scan {
   appsFound?: number | null;
   /** @nullable */
   newAppsFound?: number | null;
+  /** @nullable */
+  removedAppsFound?: number | null;
   startedAt: string;
   /** @nullable */
   completedAt?: string | null;

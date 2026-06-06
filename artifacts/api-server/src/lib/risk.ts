@@ -1,25 +1,41 @@
 const HIGH_RISK_SCOPES = [
   "https://mail.google.com/",
   "https://www.googleapis.com/auth/gmail",
-  "https://www.googleapis.com/auth/drive",
-  "https://www.googleapis.com/auth/admin",
-  "https://www.googleapis.com/auth/cloud-platform",
-  "https://www.googleapis.com/auth/spreadsheets",
-  "https://www.googleapis.com/auth/documents",
   "https://www.googleapis.com/auth/gmail.compose",
   "https://www.googleapis.com/auth/gmail.modify",
   "https://www.googleapis.com/auth/gmail.send",
+  "https://www.googleapis.com/auth/gmail.insert",
+  "https://www.googleapis.com/auth/gmail.settings",
+  "https://www.googleapis.com/auth/drive",
+  "https://www.googleapis.com/auth/drive.appdata",
+  "https://www.googleapis.com/auth/admin",
+  "https://www.googleapis.com/auth/apps.groups",
+  "https://www.googleapis.com/auth/cloud-platform",
+  "https://www.googleapis.com/auth/devstorage",
+  "https://www.googleapis.com/auth/bigquery",
+  "https://www.googleapis.com/auth/spreadsheets",
+  "https://www.googleapis.com/auth/documents",
+  "https://www.googleapis.com/auth/forms",
+  "https://www.googleapis.com/auth/keep",
 ];
 
 const MEDIUM_RISK_SCOPES = [
   "https://www.googleapis.com/auth/gmail.readonly",
+  "https://www.googleapis.com/auth/gmail.metadata",
   "https://www.googleapis.com/auth/gmail.labels",
   "https://www.googleapis.com/auth/calendar",
+  "https://www.googleapis.com/auth/calendar.events",
+  "https://www.googleapis.com/auth/calendar.readonly",
   "https://www.googleapis.com/auth/contacts",
+  "https://www.googleapis.com/auth/contacts.readonly",
   "https://www.googleapis.com/auth/directory.readonly",
   "https://www.googleapis.com/auth/drive.readonly",
   "https://www.googleapis.com/auth/drive.file",
   "https://www.googleapis.com/auth/spreadsheets.readonly",
+  "https://www.googleapis.com/auth/documents.readonly",
+  "https://www.googleapis.com/auth/tasks",
+  "https://www.googleapis.com/auth/chat",
+  "https://www.googleapis.com/auth/photoslibrary",
 ];
 
 const SCOPE_DESCRIPTIONS: Record<string, string> = {
@@ -62,7 +78,10 @@ export function categorizeApp(appName: string): string {
   return "Other";
 }
 
-export function scoreApp(scopes: string[]): { riskLevel: "high" | "medium" | "low"; riskScore: number; riskReasons: string[] } {
+export function scoreApp(
+  scopes: string[],
+  userCount = 0,
+): { riskLevel: "high" | "medium" | "low"; riskScore: number; riskReasons: string[] } {
   let score = 0;
   const reasons: string[] = [];
 
@@ -83,6 +102,15 @@ export function scoreApp(scopes: string[]): { riskLevel: "high" | "medium" | "lo
   if (scopes.length > 5) {
     score += 10;
     reasons.push(`Requests many permissions (${scopes.length} scopes)`);
+  }
+
+  // Blast radius: an app authorized by many users is a bigger exposure.
+  if (userCount >= 20) {
+    score += 15;
+    reasons.push(`Broadly authorized across the org (${userCount} users)`);
+  } else if (userCount >= 5) {
+    score += 8;
+    reasons.push(`Authorized by multiple users (${userCount})`);
   }
 
   score = Math.min(score, 100);

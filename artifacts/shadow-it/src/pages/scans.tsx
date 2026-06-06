@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Activity, Play, CheckCircle2, XCircle, Loader2, Calendar, AppWindow, Sparkles } from "lucide-react";
+import { Activity, Play, CheckCircle2, XCircle, Loader2, Calendar, AppWindow, Sparkles, MinusCircle } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 
 export function Scans() {
@@ -138,6 +138,12 @@ export function Scans() {
                             <span className="flex items-center gap-1 text-blue-600">
                               <Sparkles className="w-3.5 h-3.5" />
                               {scan.newAppsFound} new
+                            </span>
+                          )}
+                          {(scan.removedAppsFound ?? 0) > 0 && (
+                            <span className="flex items-center gap-1 text-amber-600">
+                              <MinusCircle className="w-3.5 h-3.5" />
+                              {scan.removedAppsFound} revoked
                             </span>
                           )}
                         </>

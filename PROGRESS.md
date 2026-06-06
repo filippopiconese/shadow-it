@@ -72,6 +72,23 @@ Obiettivo: far funzionare la scansione su un Workspace reale in self-hosting.
 - ✅ Pulito il commento fuorviante in `connect.tsx`.
 - ⬜ Test e2e del flusso reale con un Google Workspace di prova (richiede credenziali).
 
+## Sviluppo senza Google Workspace ✅ (2026-06-06)
+
+Per procedere prima di avere un Workspace reale.
+
+- ✅ **Mock scan provider** (`SCAN_PROVIDER=mock`, `lib/scan-providers.ts`): la
+  scansione restituisce app sintetiche invece di chiamare l'Admin SDK, così
+  l'intero flusso reale gira senza Google — `POST /api/scans/trigger` →
+  `scan-service` → upsert → alert → polling/scan history, **e** lo scheduler.
+  Dati condivisi tra seed e mock in `lib/demo-data.ts`; il dev-login "connette"
+  l'org demo (token fittizio) così Run Scan e scheduler la includono. La prima
+  scansione post-seed scopre 1 app high-risk nuova → alert (verificato e2e).
+- ✅ **Logo Micro SaaS**: marchio condiviso (`public/logo-icon.png`), componente
+  `<Logo>` riutilizzabile su landing/sidebar/connect, favicon aggiornata, footer
+  landing con colonne + link a micro-saas.it/contatti e copyright Micro SaaS.
+- ✅ **Icone app** (`iconUrl`): popolate via Google favicon service nei dati demo
+  e persistite dallo scan; il frontend già le mostrava con fallback.
+
 ## Sprint 2 — Differenziatori di prodotto 🔄
 
 - ✅ **Scansioni automatiche schedulate** (`lib/scheduler.ts`): avviate da `index.ts`,
@@ -82,9 +99,15 @@ Obiettivo: far funzionare la scansione su un Workspace reale in self-hosting.
   ai admin dell'org un riepilogo delle nuove app ad alto rischio. Usa SMTP se
   configurato (`SMTP_*`), altrimenti logga l'alert (testabile senza credenziali).
   Endpoint dev `POST /api/dev/test-alert`.
-- ⬜ Icone/logo delle app (campo `iconUrl` già presente, non popolato).
-- ⬜ Storico/diff tra scansioni (app comparse/sparite).
-- ⬜ Hardening risk scoring (più scope, app verificate vs non verificate da Google).
+- ✅ Icone/logo delle app (`iconUrl` popolato + reso).
+- ✅ **Storico/diff tra scansioni**: ogni scan rileva le app revocate (presenti
+  prima, assenti ora) → `oauth_apps.status` `active`/`removed`, contatore
+  `scans.removedAppsFound`. UI: badge "Revoked" + riga attenuata nella lista app,
+  "N revoked" nello storico scansioni; la dashboard conta solo le app attive.
+  Il mock esclude un'app (Loom) per dimostrare la rimozione. Verificato e2e.
+- ✅ **Hardening risk scoring**: più scope sensibili (gmail.insert/settings,
+  drive.appdata, bigquery, cloud-platform, forms, keep…) + fattore di
+  **esposizione** (app autorizzata da molti utenti → punteggio più alto).
 
 ## Sprint 3 — Go-to-market ⬜
 

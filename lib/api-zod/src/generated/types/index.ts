@@ -18,6 +18,7 @@ export * from './listAppsRisk';
 export * from './oAuthApp';
 export * from './oAuthAppDetail';
 export * from './oAuthAppRiskLevel';
+export * from './oAuthAppStatus';
 export * from './scan';
 export * from './scanStatus';
 export * from './successResponse';

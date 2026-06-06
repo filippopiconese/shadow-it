@@ -70,6 +70,7 @@ export interface DiscoveredApp {
   appName: string;
   scopes: string[];
   authorizedUsers: string[];
+  iconUrl?: string | null;
 }
 
 export async function scanWorkspaceApps(
@@ -135,6 +136,6 @@ export async function scanWorkspaceApps(
 export function categorizeAndScore(app: DiscoveredApp) {
   return {
     category: categorizeApp(app.appName),
-    ...scoreApp(app.scopes),
+    ...scoreApp(app.scopes, app.authorizedUsers.length),
   };
 }

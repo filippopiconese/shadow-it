@@ -1,6 +1,7 @@
 import { db, scansTable, oauthAppsTable, organizationsTable, type Organization, type Scan } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
-import { scanWorkspaceApps, categorizeAndScore, createOAuth2Client, refreshTokensIfNeeded } from "./google";
+import { eq, and, notInArray } from "drizzle-orm";
+import { categorizeAndScore, createOAuth2Client, refreshTokensIfNeeded } from "./google";
+import { discoverWorkspaceApps, isMockProvider } from "./scan-providers";
 import { sendNewHighRiskAppsAlert } from "./email";
 import { logger } from "./logger";
 
@@ -53,28 +54,41 @@ export async function createScan(organizationId: number): Promise<Scan> {
 export async function executeScan(scanId: number, orgId: number): Promise<void> {
   try {
     const [org] = await db.select().from(organizationsTable).where(eq(organizationsTable.id, orgId));
-    if (!org?.accessToken) {
+    if (!org) {
       await db
         .update(scansTable)
-        .set({ status: "failed", errorMessage: "Google Workspace not connected", completedAt: new Date() })
+        .set({ status: "failed", errorMessage: "Organization not found", completedAt: new Date() })
         .where(eq(scansTable.id, scanId));
       return;
     }
 
-    const accessToken = await getValidAccessToken(org);
-    if (!accessToken) {
-      await db
-        .update(scansTable)
-        .set({ status: "failed", errorMessage: "No valid Google access token", completedAt: new Date() })
-        .where(eq(scansTable.id, scanId));
-      return;
+    // Real Google provider needs a valid token; the mock provider doesn't.
+    let accessToken: string | undefined;
+    if (!isMockProvider()) {
+      if (!org.accessToken) {
+        await db
+          .update(scansTable)
+          .set({ status: "failed", errorMessage: "Google Workspace not connected", completedAt: new Date() })
+          .where(eq(scansTable.id, scanId));
+        return;
+      }
+      const token = await getValidAccessToken(org);
+      if (!token) {
+        await db
+          .update(scansTable)
+          .set({ status: "failed", errorMessage: "No valid Google access token", completedAt: new Date() })
+          .where(eq(scansTable.id, scanId));
+        return;
+      }
+      accessToken = token;
     }
 
-    const discovered = await scanWorkspaceApps(accessToken, org.refreshToken ?? "");
+    const discovered = await discoverWorkspaceApps(org, accessToken);
 
     let appsFound = 0;
     let newAppsFound = 0;
     const newHighRiskApps: Array<{ appName: string; riskScore: number; userCount: number }> = [];
+    const discoveredClientIds = discovered.map((d) => d.clientId);
 
     for (const app of discovered) {
       const { category, riskLevel, riskScore } = categorizeAndScore(app);
@@ -94,6 +108,8 @@ export async function executeScan(scanId: number, orgId: number): Promise<void> 
             riskLevel,
             riskScore,
             category,
+            iconUrl: app.iconUrl ?? existing.iconUrl,
+            status: "active", // reactivate if it had been marked removed
             lastSeenAt: new Date(),
           })
           .where(eq(oauthAppsTable.id, existing.id));
@@ -107,6 +123,7 @@ export async function executeScan(scanId: number, orgId: number): Promise<void> 
           riskLevel,
           riskScore,
           category,
+          iconUrl: app.iconUrl ?? null,
         });
         newAppsFound++;
         if (riskLevel === "high") {
@@ -116,12 +133,32 @@ export async function executeScan(scanId: number, orgId: number): Promise<void> 
       appsFound++;
     }
 
+    // Diff: apps previously active but absent from this scan have been revoked.
+    let removedAppsFound = 0;
+    if (discoveredClientIds.length > 0) {
+      const removed = await db
+        .update(oauthAppsTable)
+        .set({ status: "removed" })
+        .where(
+          and(
+            eq(oauthAppsTable.organizationId, orgId),
+            eq(oauthAppsTable.status, "active"),
+            notInArray(oauthAppsTable.clientId, discoveredClientIds),
+          ),
+        )
+        .returning();
+      removedAppsFound = removed.length;
+    }
+
     await db
       .update(scansTable)
-      .set({ status: "completed", appsFound, newAppsFound, completedAt: new Date() })
+      .set({ status: "completed", appsFound, newAppsFound, removedAppsFound, completedAt: new Date() })
       .where(eq(scansTable.id, scanId));
 
-    logger.info({ scanId, appsFound, newAppsFound, newHighRisk: newHighRiskApps.length }, "Scan completed");
+    logger.info(
+      { scanId, appsFound, newAppsFound, removedAppsFound, newHighRisk: newHighRiskApps.length },
+      "Scan completed",
+    );
 
     if (newHighRiskApps.length > 0) {
       await sendNewHighRiskAppsAlert(orgId, newHighRiskApps).catch((err) =>

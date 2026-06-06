@@ -11,6 +11,8 @@ export const oauthAppsTable = pgTable("oauth_apps", {
   category: text("category").notNull().default("Other"),
   riskLevel: text("risk_level").notNull().default("low"),
   riskScore: integer("risk_score").notNull().default(0),
+  // "active" = present in the latest scan, "removed" = no longer authorized.
+  status: text("status").notNull().default("active"),
   scopes: text("scopes").array().notNull().default([]),
   authorizedUsers: text("authorized_users").array().notNull().default([]),
   isDismissed: boolean("is_dismissed").notNull().default(false),

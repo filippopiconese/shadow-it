@@ -9,6 +9,7 @@ export const scansTable = pgTable("scans", {
   status: text("status").notNull().default("pending"),
   appsFound: integer("apps_found"),
   newAppsFound: integer("new_apps_found"),
+  removedAppsFound: integer("removed_apps_found"),
   errorMessage: text("error_message"),
   startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
   completedAt: timestamp("completed_at", { withTimezone: true }),
