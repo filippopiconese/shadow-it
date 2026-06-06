@@ -3,6 +3,7 @@ import { db, organizationsTable, usersTable, subscriptionsTable } from "@workspa
 import { eq } from "drizzle-orm";
 import { createOAuth2Client, getAuthUrl, checkIsWorkspaceAdmin } from "../lib/google";
 import { isEntitled } from "../lib/entitlements";
+import { encryptSecret } from "../lib/crypto";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -62,8 +63,8 @@ router.get("/auth/google/callback", async (req, res): Promise<void> => {
         .values({
           domain,
           name: domain,
-          accessToken: tokens.access_token ?? null,
-          refreshToken: tokens.refresh_token ?? null,
+          accessToken: encryptSecret(tokens.access_token ?? null),
+          refreshToken: encryptSecret(tokens.refresh_token ?? null),
           tokenExpiry: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
         })
         .returning();
@@ -78,8 +79,8 @@ router.get("/auth/google/callback", async (req, res): Promise<void> => {
       await db
         .update(organizationsTable)
         .set({
-          accessToken: tokens.access_token ?? org.accessToken,
-          refreshToken: tokens.refresh_token ?? org.refreshToken,
+          accessToken: tokens.access_token ? encryptSecret(tokens.access_token) : org.accessToken,
+          refreshToken: tokens.refresh_token ? encryptSecret(tokens.refresh_token) : org.refreshToken,
           tokenExpiry: tokens.expiry_date ? new Date(tokens.expiry_date) : org.tokenExpiry,
         })
         .where(eq(organizationsTable.id, org.id));

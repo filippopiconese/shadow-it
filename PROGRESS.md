@@ -6,6 +6,21 @@ Legenda: ✅ fatto · 🔄 in corso · ⬜ da fare
 
 ---
 
+## Hardening pre-produzione + CI ✅ (2026-06-06)
+
+- ✅ **Cifratura token OAuth at-rest** (`lib/crypto.ts`, AES-256-GCM, chiave
+  `TOKEN_ENCRYPTION_KEY`): i token Google sono cifrati in scrittura (callback +
+  refresh) e decifrati in lettura (scan). Formato `enc:v1:…`; valori non-cifrati
+  (marker demo, righe legacy) passano invariati → adozione senza migrazione.
+  Senza chiave → fallback in chiaro con warning (errore in produzione).
+- ✅ **Test isolamento tenant** (`scripts/test-isolation.mjs`, `pnpm test:isolation`):
+  crea 2 tenant via endpoint dev-only (`seed-tenant`, `login-as`) e verifica via API
+  reale che ognuno veda solo i propri dati (lista, dettaglio→404 cross-tenant,
+  dashboard, 401 non-auth). **8/8 check passati.**
+- ✅ **CI GitHub Actions** (`.github/workflows/ci.yml`): su push/PR → install
+  frozen-lockfile + `pnpm typecheck` + `pnpm build`.
+- ℹ️ Rate-limit/log e gestione errori OAuth nel callback erano già presenti.
+
 ## Demo pubblica try-before-connect ✅ (2026-06-06)
 
 - ✅ **Demo sicura in produzione**: separata da `/api/dev/*` in `routes/demo.ts`
@@ -70,8 +85,8 @@ Legenda: ✅ fatto · 🔄 in corso · ⬜ da fare
 - **Multi-tenant**: segregazione logica per `organizationId` su ogni query.
 
 ### Backlog sicurezza (prod)
-- ⬜ Cifrare i token OAuth at-rest (oggi in chiaro nel DB).
-- ⬜ Test automatico di isolamento tra tenant.
+- ✅ Cifrare i token OAuth at-rest → fatto (vedi sezione Hardening).
+- ✅ Test automatico di isolamento tra tenant → fatto (`pnpm test:isolation`).
 
 ## Rebrand — allineamento all'hub Micro SaaS ✅ (2026-06-03)
 

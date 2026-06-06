@@ -3,6 +3,7 @@ import { eq, and, notInArray } from "drizzle-orm";
 import { categorizeAndScore, createOAuth2Client, refreshTokensIfNeeded } from "./google";
 import { discoverWorkspaceApps, isMockProvider } from "./scan-providers";
 import { DEMO_DOMAIN } from "./demo-data";
+import { encryptSecret, decryptSecret } from "./crypto";
 import { sendNewHighRiskAppsAlert } from "./email";
 import { logger } from "./logger";
 
@@ -15,8 +16,8 @@ async function getValidAccessToken(org: Organization): Promise<string | null> {
 
   const client = createOAuth2Client();
   client.setCredentials({
-    access_token: org.accessToken,
-    refresh_token: org.refreshToken ?? undefined,
+    access_token: decryptSecret(org.accessToken) ?? undefined,
+    refresh_token: decryptSecret(org.refreshToken) ?? undefined,
   });
 
   const refreshed = await refreshTokensIfNeeded(client, org.tokenExpiry);
@@ -24,8 +25,8 @@ async function getValidAccessToken(org: Organization): Promise<string | null> {
     await db
       .update(organizationsTable)
       .set({
-        accessToken: refreshed.accessToken,
-        refreshToken: refreshed.refreshToken ?? org.refreshToken,
+        accessToken: encryptSecret(refreshed.accessToken),
+        refreshToken: refreshed.refreshToken ? encryptSecret(refreshed.refreshToken) : org.refreshToken,
         tokenExpiry: refreshed.expiry,
       })
       .where(eq(organizationsTable.id, org.id));
@@ -33,7 +34,7 @@ async function getValidAccessToken(org: Organization): Promise<string | null> {
     return refreshed.accessToken;
   }
 
-  return org.accessToken;
+  return decryptSecret(org.accessToken);
 }
 
 /** Inserts a new scan row in the `running` state. */

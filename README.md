@@ -81,6 +81,7 @@ senza un Google Workspace. Imposta `SCAN_PROVIDER=google` per la scansione vera.
 | `pnpm dev:api` | Build + avvio API server (`:8080`) |
 | `pnpm dev:web` | Vite dev server (`:25255`) |
 | `pnpm typecheck` | Typecheck di tutto il workspace |
+| `pnpm test:isolation` | Test isolamento tra tenant (richiede l'API in esecuzione, non-prod) |
 | `pnpm build` | Typecheck + build di tutti i package |
 | `pnpm --filter @workspace/api-spec run codegen` | Rigenera hook + Zod dall'OpenAPI |
 
@@ -192,8 +193,12 @@ funzionano anche dopo un refresh o il redirect OAuth.
 - Il progetto è stato migrato da Replit a sviluppo locale / self-hosting: rimossi
   i file e i plugin specifici di Replit. Il lockfile è stato esteso ai binari
   nativi `win32-x64` (esbuild, rollup, lightningcss, oxide) in `pnpm-workspace.yaml`.
-- La route **`/api/dev/login`** (seed demo + bypass auth), **`/api/dev/run-scheduler`**
-  e **`/api/dev/test-alert`** sono montate **solo** se `NODE_ENV !== "production"`.
-  Non vengono mai esposte in produzione.
+- **Demo pubblica** `/api/demo/*` (sandbox, org `demo-acme.com`, scan sempre mock):
+  attiva anche in produzione salvo `DEMO_ENABLED=false`. Gli endpoint pericolosi
+  `/api/dev/*` (`run-scheduler`, `test-alert`, `seed-tenant`, `login-as`) sono montati
+  **solo** se `NODE_ENV !== "production"`.
+- **Sicurezza**: i token OAuth Google sono **cifrati at-rest** (AES-256-GCM) — in
+  produzione imposta `TOKEN_ENCRYPTION_KEY` (`openssl rand -base64 32`). L'isolamento
+  tra tenant è coperto da `pnpm test:isolation`. CI in `.github/workflows/ci.yml`.
 
 Vedi [PROGRESS.md](PROGRESS.md) per lo stato degli sprint.

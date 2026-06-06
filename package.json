@@ -11,9 +11,14 @@
     "db:down": "docker compose down",
     "db:push": "pnpm --filter @workspace/db run push",
     "dev:api": "pnpm --filter @workspace/api-server run dev",
-    "dev:web": "pnpm --filter @workspace/shadow-it run dev"
+    "dev:web": "pnpm --filter @workspace/shadow-it run dev",
+    "test:isolation": "pnpm --filter @workspace/scripts run test:isolation"
   },
   "private": true,
+  "packageManager": "pnpm@11.5.1",
+  "engines": {
+    "node": ">=24"
+  },
   "devDependencies": {
     "prettier": "^3.8.3",
     "typescript": "~5.9.3"
