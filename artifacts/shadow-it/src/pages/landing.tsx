@@ -32,15 +32,34 @@ export function LandingPage() {
     window.location.href = "/api/auth/google";
   };
 
-  // Dev-only: seed a demo workspace and jump straight into the dashboard,
-  // bypassing Google OAuth. Stripped from production builds.
+  const [demoError, setDemoError] = useState<string | null>(null);
+  const [demoLoading, setDemoLoading] = useState(false);
+
+  // Seed a sandboxed demo workspace and jump into the dashboard.
   const handleDemo = async () => {
-    const res = await fetch("/api/demo/login", { method: "POST", credentials: "include" });
-    if (res.ok) {
-      const data = (await res.json()) as { redirect?: string };
-      window.location.href = data.redirect ?? "/dashboard";
-    } else {
-      alert("Demo login failed. Is the API server running?");
+    setDemoError(null);
+    setDemoLoading(true);
+    try {
+      const res = await fetch("/api/demo/login", { method: "POST", credentials: "include" });
+      if (res.ok) {
+        const data = (await res.json()) as { redirect?: string };
+        window.location.href = data.redirect ?? "/dashboard";
+        return;
+      }
+      let detail = `HTTP ${res.status}`;
+      try {
+        const body = (await res.json()) as { error?: string };
+        if (body?.error) detail = body.error;
+      } catch {
+        /* response had no JSON body */
+      }
+      console.error("Demo login failed:", res.status, detail);
+      setDemoError(`The live demo is temporarily unavailable (${detail}). Please try again shortly.`);
+    } catch (err) {
+      console.error("Demo login error:", err);
+      setDemoError("Couldn't reach the server. Please try again shortly.");
+    } finally {
+      setDemoLoading(false);
     }
   };
 
@@ -56,8 +75,8 @@ export function LandingPage() {
           <div className="flex items-center gap-2 sm:gap-3">
             <button onClick={handleConnect} className="hidden sm:inline-flex text-sm font-semibold text-slate-300 hover:text-white px-3 py-2 rounded-full transition-colors">Log in</button>
             {demoEnabled && (
-              <button onClick={handleDemo} data-testid="demo-button" className="inline-flex items-center text-sm font-semibold text-slate-200 px-4 py-2 rounded-full transition-colors" style={{ border: "1px solid rgba(148,163,184,0.35)" }}>
-                View live demo
+              <button onClick={handleDemo} disabled={demoLoading} data-testid="demo-button" className="inline-flex items-center text-sm font-semibold text-slate-200 px-4 py-2 rounded-full transition-colors disabled:opacity-60" style={{ border: "1px solid rgba(148,163,184,0.35)" }}>
+                {demoLoading ? "Loading…" : "View live demo"}
               </button>
             )}
             <button onClick={handleConnect} className="inline-flex items-center gap-2 text-sm font-extrabold text-white px-5 py-2.5 rounded-full" style={{ background: "linear-gradient(135deg,#6366f1,#4338ca)", boxShadow: "0 8px 28px rgba(99,102,241,0.4)" }}>
@@ -68,11 +87,11 @@ export function LandingPage() {
       </header>
 
       <main className="flex-1">
-        {errorMessage && (
+        {(errorMessage || demoError) && (
           <div className="max-w-3xl mx-auto px-6 pt-6">
             <div className="flex items-start gap-3 rounded-xl p-4" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)" }}>
               <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: "#fca5a5" }} />
-              <p className="text-sm" style={{ color: "#fecaca" }}>{errorMessage}</p>
+              <p className="text-sm" style={{ color: "#fecaca" }}>{errorMessage ?? demoError}</p>
             </div>
           </div>
         )}

@@ -23,10 +23,12 @@ Legenda: ✅ fatto · 🔄 in corso · ⬜ da fare
 - ✅ **Fix CI**: `pnpm install --frozen-lockfile --ignore-scripts` (pnpm 11 falliva su
   "ignored build scripts" in non-TTY); rimosso `version` dall'action (conflitto con
   `packageManager`); `.npmrc` `verify-deps-before-run=false`.
-- ✅ **Fix runtime Railway**: gestione **SSL automatica** del DB (`lib/db/src/ssl.ts`,
-  on per host pubblici/managed, off per local/`*.railway.internal`; override `DATABASE_SSL`)
-  applicata a pool app + drizzle-kit; **start resiliente** (retry del `db push` finché il
-  DB è raggiungibile, poi avvia comunque il server → niente crash-loop).
+- ✅ **Fix runtime Railway**: gestione **SSL automatica** del DB (`lib/db/src/ssl.ts`).
+- ✅ **Schema applicato all'avvio dall'app** (`lib/db/src/migrate.ts`, `runMigrations(pool)`
+  idempotente con `CREATE TABLE IF NOT EXISTS`): su Railway **drizzle-kit push fallisce**
+  l'introspection sulla rete privata, mentre il pool `pg` dell'app si connette → creiamo
+  lo schema con la connessione che funziona, niente drizzle-kit a runtime. Diagnostica
+  pubblica `GET /api/healthz/db` (`{db, schemaReady}`). Start command = solo `node`.
 
 ## Hardening pre-produzione + CI ✅ (2026-06-06)
 
