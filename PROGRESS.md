@@ -14,9 +14,12 @@ Legenda: ✅ fatto · 🔄 in corso · ⬜ da fare
   **cifrata at-rest** (stessa crypto) e mai restituita dall'API. `email.ts` usa l'SMTP
   dell'org (fallback env `SMTP_*`, poi log). Endpoint `GET/PUT /api/settings/email` +
   `POST /api/settings/email/test`. Verificato e2e (round-trip, no-leak password, test→400).
-- ✅ **Deploy Railway**: `railway.json` (build `pnpm build`, start = `db push-force` +
-  API single-server), `engines.node>=24` + `packageManager` pinnato. Guida variabili
-  in chat/README.
+- ✅ **Deploy Railway via Dockerfile**: Nixpacks falliva (corepack 0.24.1 + Node 24 +
+  pnpm 11 → `ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING`). Aggiunto `Dockerfile`
+  (node:24-slim, `pnpm@11.5.1` via npm, install `--ignore-scripts`, build, start =
+  `db push-force` + API single-server) + `.dockerignore`; `railway.json` → builder
+  DOCKERFILE. **Verificato in locale**: build immagine OK + run in prod (schema
+  applicato, health 200, SPA servita, demo on / dev off).
 
 ## Hardening pre-produzione + CI ✅ (2026-06-06)
 
