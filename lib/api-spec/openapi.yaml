@@ -247,6 +247,49 @@ paths:
               schema:
                 $ref: "#/components/schemas/BillingStatus"
 
+  /settings/email:
+    get:
+      operationId: getEmailSettings
+      tags: [settings]
+      summary: Get the organization's alert email (SMTP) settings
+      responses:
+        "200":
+          description: Email settings (never returns the SMTP password)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailSettings"
+    put:
+      operationId: updateEmailSettings
+      tags: [settings]
+      summary: Update the organization's alert email (SMTP) settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailSettingsInput"
+      responses:
+        "200":
+          description: Updated email settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailSettings"
+
+  /settings/email/test:
+    post:
+      operationId: testEmailSettings
+      tags: [settings]
+      summary: Send a test alert email using the saved SMTP settings
+      responses:
+        "200":
+          description: Test email sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -269,6 +312,43 @@ components:
         success:
           type: boolean
       required: [success]
+
+    EmailSettings:
+      type: object
+      properties:
+        smtpHost:
+          type: ["string", "null"]
+        smtpPort:
+          type: ["integer", "null"]
+        smtpSecure:
+          type: boolean
+        smtpUser:
+          type: ["string", "null"]
+        emailFrom:
+          type: ["string", "null"]
+        alertEmails:
+          type: ["string", "null"]
+        hasPassword:
+          type: boolean
+      required: [smtpSecure, hasPassword]
+
+    EmailSettingsInput:
+      type: object
+      properties:
+        smtpHost:
+          type: ["string", "null"]
+        smtpPort:
+          type: ["integer", "null"]
+        smtpSecure:
+          type: boolean
+        smtpUser:
+          type: ["string", "null"]
+        smtpPass:
+          type: ["string", "null"]
+        emailFrom:
+          type: ["string", "null"]
+        alertEmails:
+          type: ["string", "null"]
 
     CurrentUser:
       type: object

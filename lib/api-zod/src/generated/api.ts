@@ -211,3 +211,49 @@ export const GetBillingStatusResponse = zod.object({
 })
 
 
+/**
+ * @summary Get the organization's alert email (SMTP) settings
+ */
+export const GetEmailSettingsResponse = zod.object({
+  "smtpHost": zod.string().nullish(),
+  "smtpPort": zod.number().nullish(),
+  "smtpSecure": zod.boolean(),
+  "smtpUser": zod.string().nullish(),
+  "emailFrom": zod.string().nullish(),
+  "alertEmails": zod.string().nullish(),
+  "hasPassword": zod.boolean()
+})
+
+
+/**
+ * @summary Update the organization's alert email (SMTP) settings
+ */
+export const UpdateEmailSettingsBody = zod.object({
+  "smtpHost": zod.string().nullish(),
+  "smtpPort": zod.number().nullish(),
+  "smtpSecure": zod.boolean().optional(),
+  "smtpUser": zod.string().nullish(),
+  "smtpPass": zod.string().nullish(),
+  "emailFrom": zod.string().nullish(),
+  "alertEmails": zod.string().nullish()
+})
+
+export const UpdateEmailSettingsResponse = zod.object({
+  "smtpHost": zod.string().nullish(),
+  "smtpPort": zod.number().nullish(),
+  "smtpSecure": zod.boolean(),
+  "smtpUser": zod.string().nullish(),
+  "emailFrom": zod.string().nullish(),
+  "alertEmails": zod.string().nullish(),
+  "hasPassword": zod.boolean()
+})
+
+
+/**
+ * @summary Send a test alert email using the saved SMTP settings
+ */
+export const TestEmailSettingsResponse = zod.object({
+  "success": zod.boolean()
+})
+
+

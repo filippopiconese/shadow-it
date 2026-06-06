@@ -17,6 +17,37 @@ export interface SuccessResponse {
   success: boolean;
 }
 
+export interface EmailSettings {
+  /** @nullable */
+  smtpHost?: string | null;
+  /** @nullable */
+  smtpPort?: number | null;
+  smtpSecure: boolean;
+  /** @nullable */
+  smtpUser?: string | null;
+  /** @nullable */
+  emailFrom?: string | null;
+  /** @nullable */
+  alertEmails?: string | null;
+  hasPassword: boolean;
+}
+
+export interface EmailSettingsInput {
+  /** @nullable */
+  smtpHost?: string | null;
+  /** @nullable */
+  smtpPort?: number | null;
+  smtpSecure?: boolean;
+  /** @nullable */
+  smtpUser?: string | null;
+  /** @nullable */
+  smtpPass?: string | null;
+  /** @nullable */
+  emailFrom?: string | null;
+  /** @nullable */
+  alertEmails?: string | null;
+}
+
 export interface CurrentUser {
   id: number;
   email: string;

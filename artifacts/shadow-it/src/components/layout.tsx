@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import { useGetMe, useLogout } from "@workspace/api-client-react";
-import { LayoutDashboard, Grid, Activity, CreditCard, LogOut, Loader2, Menu } from "lucide-react";
+import { LayoutDashboard, Grid, Activity, CreditCard, Settings as SettingsIcon, LogOut, Loader2, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -40,6 +40,7 @@ export function Layout({ children }: LayoutProps) {
     { href: "/apps", label: "Discovered Apps", icon: Grid },
     { href: "/scans", label: "Scan History", icon: Activity },
     { href: "/billing", label: "Plan", icon: CreditCard },
+    { href: "/settings", label: "Settings", icon: SettingsIcon },
   ];
 
   const SidebarContent = () => (

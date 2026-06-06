@@ -5,6 +5,7 @@ import appsRouter from "./apps";
 import scansRouter from "./scans";
 import dashboardRouter from "./dashboard";
 import billingRouter from "./billing";
+import settingsRouter from "./settings";
 import demoRouter from "./demo";
 import devRouter from "./dev";
 
@@ -16,6 +17,7 @@ router.use(appsRouter);
 router.use(scansRouter);
 router.use(dashboardRouter);
 router.use(billingRouter);
+router.use(settingsRouter);
 
 // Public, sandboxed demo (try-before-connect). On by default — even in
 // production — so prospects can evaluate the product. Disable with DEMO_ENABLED=false.

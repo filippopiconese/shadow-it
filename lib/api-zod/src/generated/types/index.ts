@@ -11,6 +11,8 @@ export * from './billingStatus';
 export * from './checkoutSession';
 export * from './currentUser';
 export * from './dashboardSummary';
+export * from './emailSettings';
+export * from './emailSettingsInput';
 export * from './errorResponse';
 export * from './healthStatus';
 export * from './listAppsParams';

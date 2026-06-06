@@ -6,6 +6,18 @@ Legenda: ✅ fatto · 🔄 in corso · ⬜ da fare
 
 ---
 
+## SMTP per-cliente + deploy Railway ✅ (2026-06-06)
+
+- ✅ **SMTP per-organizzazione**: ogni cliente configura il proprio SMTP dalla nuova
+  pagina **Settings** (host/porta/TLS/utente/password/from/destinatari) → le email di
+  alert partono dalla **sua** infrastruttura, niente passa dalla nostra. Password SMTP
+  **cifrata at-rest** (stessa crypto) e mai restituita dall'API. `email.ts` usa l'SMTP
+  dell'org (fallback env `SMTP_*`, poi log). Endpoint `GET/PUT /api/settings/email` +
+  `POST /api/settings/email/test`. Verificato e2e (round-trip, no-leak password, test→400).
+- ✅ **Deploy Railway**: `railway.json` (build `pnpm build`, start = `db push-force` +
+  API single-server), `engines.node>=24` + `packageManager` pinnato. Guida variabili
+  in chat/README.
+
 ## Hardening pre-produzione + CI ✅ (2026-06-06)
 
 - ✅ **Cifratura token OAuth at-rest** (`lib/crypto.ts`, AES-256-GCM, chiave

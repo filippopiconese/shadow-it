@@ -11,6 +11,7 @@ import { AppList } from "@/pages/app-list";
 import { AppDetail } from "@/pages/app-detail";
 import { Scans } from "@/pages/scans";
 import { Billing } from "@/pages/billing";
+import { Settings } from "@/pages/settings";
 import { Connect } from "@/pages/connect";
 import { Privacy } from "@/pages/privacy";
 import { Terms } from "@/pages/terms";
@@ -39,6 +40,7 @@ function Router() {
             <Route path="/apps/:id" component={AppDetail} />
             <Route path="/scans" component={Scans} />
             <Route path="/billing" component={Billing} />
+            <Route path="/settings" component={Settings} />
             <Route component={NotFound} />
           </Switch>
         </Layout>
