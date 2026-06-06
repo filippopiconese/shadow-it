@@ -5,26 +5,23 @@ on:
     branches: [main]
   pull_request:
 
-# pnpm/action-setup has no Node 24 major yet; force it onto Node 24 so the
-# (harmless, informational) Node 20 deprecation notice doesn't escalate.
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
-      - name: Setup pnpm
-        # Version comes from the "packageManager" field in package.json.
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: 24
-          cache: pnpm
+
+      - name: Enable pnpm via corepack
+        # corepack ships with Node 24 (runs on Node 24, no deprecation notice).
+        # Picks the pnpm version from the "packageManager" field in package.json.
+        run: |
+          corepack enable pnpm
+          pnpm --version
 
       - name: Install dependencies
         # --ignore-scripts: pnpm 11 exits non-zero in non-TTY over "ignored build
