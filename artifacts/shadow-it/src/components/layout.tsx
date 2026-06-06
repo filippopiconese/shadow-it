@@ -107,6 +107,14 @@ export function Layout({ children }: LayoutProps) {
 
       {/* Mobile Header & Content */}
       <div className="flex-1 md:pl-64 flex flex-col min-h-screen">
+        {user?.domain === "demo-acme.com" && (
+          <div className="bg-indigo-500/15 border-b border-indigo-500/30 px-4 py-2.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm">
+            <span className="text-indigo-200">👀 You're exploring <strong>sample demo data</strong> — connect your Google Workspace to scan your own apps.</span>
+            <button onClick={() => { window.location.href = "/api/auth/google"; }} className="font-semibold text-white underline hover:no-underline">
+              Connect Workspace →
+            </button>
+          </div>
+        )}
         <header className="md:hidden h-14 border-b border-border bg-card flex items-center justify-between px-4 sticky top-0 z-10">
           <Logo size={28} showSub={false} wordmarkClassName="text-base text-foreground" />
           <Sheet>

@@ -2,6 +2,7 @@ import { db, scansTable, oauthAppsTable, organizationsTable, type Organization, 
 import { eq, and, notInArray } from "drizzle-orm";
 import { categorizeAndScore, createOAuth2Client, refreshTokensIfNeeded } from "./google";
 import { discoverWorkspaceApps, isMockProvider } from "./scan-providers";
+import { DEMO_DOMAIN } from "./demo-data";
 import { sendNewHighRiskAppsAlert } from "./email";
 import { logger } from "./logger";
 
@@ -62,9 +63,10 @@ export async function executeScan(scanId: number, orgId: number): Promise<void> 
       return;
     }
 
-    // Real Google provider needs a valid token; the mock provider doesn't.
+    // Real Google provider needs a valid token; the mock provider and the demo
+    // org (always mock) don't.
     let accessToken: string | undefined;
-    if (!isMockProvider()) {
+    if (!isMockProvider() && org.domain !== DEMO_DOMAIN) {
       if (!org.accessToken) {
         await db
           .update(scansTable)

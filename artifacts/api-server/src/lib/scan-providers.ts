@@ -1,6 +1,6 @@
 import { type Organization } from "@workspace/db";
 import { scanWorkspaceApps, type DiscoveredApp } from "./google";
-import { DEMO_APPS, DEMO_NEW_APP } from "./demo-data";
+import { DEMO_APPS, DEMO_NEW_APP, DEMO_DOMAIN } from "./demo-data";
 
 /**
  * When SCAN_PROVIDER=mock the scan returns synthetic apps instead of calling
@@ -40,6 +40,8 @@ export async function discoverWorkspaceApps(
   org: Organization,
   accessToken?: string,
 ): Promise<DiscoveredApp[]> {
-  if (isMockProvider()) return mockDiscover();
+  // The demo org is always mock — even in production with SCAN_PROVIDER=google —
+  // so the public demo never makes a real Google call.
+  if (isMockProvider() || org.domain === DEMO_DOMAIN) return mockDiscover();
   return scanWorkspaceApps(accessToken ?? org.accessToken ?? "", org.refreshToken ?? "");
 }

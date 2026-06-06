@@ -6,6 +6,21 @@ Legenda: ✅ fatto · 🔄 in corso · ⬜ da fare
 
 ---
 
+## Demo pubblica try-before-connect ✅ (2026-06-06)
+
+- ✅ **Demo sicura in produzione**: separata da `/api/dev/*` in `routes/demo.ts`
+  (`/api/demo/enabled`, `/api/demo/login`), montata sempre salvo `DEMO_ENABLED=false`
+  — così un admin Workspace può **valutare il prodotto su dati sample prima di
+  collegare il proprio tenant**.
+- ✅ **Sicurezza**: gli endpoint pericolosi (`/api/dev/run-scheduler`, `/api/dev/test-alert`)
+  restano montati **solo** in non-produzione. Verificato: in modalità production
+  `demo/enabled`=200, `dev/*`=404.
+- ✅ **Demo isolata**: opera solo sull'org demo (`demo-acme.com`), mai su org reali;
+  la scansione demo usa **sempre il mock** anche con `SCAN_PROVIDER=google` (nessuna
+  chiamata Google reale). Re-seed deterministico a ogni accesso.
+- ✅ **UX**: bottone "View live demo" mostrato quando `/api/demo/enabled` risponde;
+  banner in-app "stai esplorando dati demo → Connect Workspace" per l'org demo.
+
 ## Pagine legali + favicon + setup Google OAuth ✅ (2026-06-06)
 
 - ✅ **Favicon** corretta (64×64 da micro-saas) + apple-touch-icon; non più deformata.

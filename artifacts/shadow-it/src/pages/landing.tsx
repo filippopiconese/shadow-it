@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Lock, Search, AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Logo } from "@/components/logo";
 
@@ -18,6 +19,15 @@ export function LandingPage() {
   const authError = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("error") : null;
   const errorMessage = authError ? (ERROR_MESSAGES[authError] ?? "Something went wrong during sign-in.") : null;
 
+  // Show the demo button whenever the backend's dev routes are available
+  // (non-production). Hidden automatically in real production.
+  const [demoEnabled, setDemoEnabled] = useState(false);
+  useEffect(() => {
+    fetch("/api/demo/enabled")
+      .then((r) => setDemoEnabled(r.ok))
+      .catch(() => setDemoEnabled(false));
+  }, []);
+
   const handleConnect = () => {
     window.location.href = "/api/auth/google";
   };
@@ -25,7 +35,7 @@ export function LandingPage() {
   // Dev-only: seed a demo workspace and jump straight into the dashboard,
   // bypassing Google OAuth. Stripped from production builds.
   const handleDemo = async () => {
-    const res = await fetch("/api/dev/login", { method: "POST", credentials: "include" });
+    const res = await fetch("/api/demo/login", { method: "POST", credentials: "include" });
     if (res.ok) {
       const data = (await res.json()) as { redirect?: string };
       window.location.href = data.redirect ?? "/dashboard";
@@ -45,7 +55,7 @@ export function LandingPage() {
           </a>
           <div className="flex items-center gap-2 sm:gap-3">
             <button onClick={handleConnect} className="hidden sm:inline-flex text-sm font-semibold text-slate-300 hover:text-white px-3 py-2 rounded-full transition-colors">Log in</button>
-            {import.meta.env.DEV && (
+            {demoEnabled && (
               <button onClick={handleDemo} data-testid="demo-button" className="inline-flex items-center text-sm font-semibold text-slate-200 px-4 py-2 rounded-full transition-colors" style={{ border: "1px solid rgba(148,163,184,0.35)" }}>
                 View live demo
               </button>
