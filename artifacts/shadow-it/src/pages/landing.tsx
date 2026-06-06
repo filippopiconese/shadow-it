@@ -199,8 +199,10 @@ export function LandingPage() {
               </ul>
             </div>
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#cbd5e1" }}>Micro SaaS</h4>
+              <h4 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#cbd5e1" }}>Legal &amp; Micro SaaS</h4>
               <ul className="space-y-2 text-sm" style={{ color: "#94a3b8" }}>
+                <li><a href="/privacy" className="hover:text-slate-200">Privacy Policy</a></li>
+                <li><a href="/terms" className="hover:text-slate-200">Terms of Service</a></li>
                 <li><a href={CONTACT_URL} target="_blank" rel="noopener" className="hover:text-slate-200">Contatti</a></li>
                 <li><a href={HUB_URL} target="_blank" rel="noopener" className="hover:text-slate-200">www.micro-saas.it</a></li>
               </ul>

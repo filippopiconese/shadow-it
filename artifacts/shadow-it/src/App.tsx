@@ -12,6 +12,8 @@ import { AppDetail } from "@/pages/app-detail";
 import { Scans } from "@/pages/scans";
 import { Billing } from "@/pages/billing";
 import { Connect } from "@/pages/connect";
+import { Privacy } from "@/pages/privacy";
+import { Terms } from "@/pages/terms";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,6 +29,8 @@ function Router() {
     <Switch>
       <Route path="/" component={LandingPage} />
       <Route path="/connect" component={Connect} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
       <Route>
         <Layout>
           <Switch>

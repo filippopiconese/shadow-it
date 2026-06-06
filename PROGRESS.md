@@ -6,6 +6,19 @@ Legenda: ✅ fatto · 🔄 in corso · ⬜ da fare
 
 ---
 
+## Pagine legali + favicon + setup Google OAuth ✅ (2026-06-06)
+
+- ✅ **Favicon** corretta (64×64 da micro-saas) + apple-touch-icon; non più deformata.
+- ✅ **Pagine legali** `/privacy` e `/terms` (route pubbliche, `LegalLayout` dark,
+  stile `.sg-legal-prose`), adattate da Secret-Scanner ma riscritte per ShadowGuard
+  (web app + Google OAuth). Include la **Google API Limited Use disclosure**
+  (richiesta per la verifica). Link nel footer landing + nelle pagine legali.
+  URL a regime: shadowit.micro-saas.it/privacy e /terms (per la consent screen).
+- ✅ **OAuth reale configurato e testabile**: con `GOOGLE_CLIENT_ID/SECRET` nel `.env`
+  e `SCAN_PROVIDER=google`, in **single-server** (`pnpm --filter @workspace/shadow-it build`
+  + `pnpm dev:api`, tutto su :8080) `/api/auth/google` reindirizza a Google.
+  Redirect URI: `http://localhost:8080/api/auth/google/callback`.
+
 ## Lancio gratuito (no Stripe) + UX login ✅ (2026-06-06)
 
 - ✅ **Modello "lancio gratuito"**: `lib/entitlements.ts` (`LAUNCH_FREE`, default true)
