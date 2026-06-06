@@ -6,6 +6,23 @@ Legenda: ✅ fatto · 🔄 in corso · ⬜ da fare
 
 ---
 
+## Lancio gratuito (no Stripe) + UX login ✅ (2026-06-06)
+
+- ✅ **Modello "lancio gratuito"**: `lib/entitlements.ts` (`LAUNCH_FREE`, default true)
+  → ogni workspace ha accesso completo gratis, **Stripe non collegato**. Gate scansioni,
+  `auth/me` e `billing/status` passano per `isEntitled()`. Le route Stripe restano
+  dormienti (riattivabili con `LAUNCH_FREE=false`).
+- ✅ **Landing pricing** rifatto sul modello dell'hub Secret-Scanner: banner "🚀 Launch
+  offer — all features free" + sezione "What's coming after launch" con colonne
+  **Free** (€0, coming soon) e **Pro** (coming soon).
+- ✅ **Pagina Plan** (ex Billing): rimossa la UI Stripe; mostra "Launch plan — all
+  features free (Active)" + Free/Pro coming soon. Voce nav rinominata "Plan".
+- ✅ **UX login**: `/auth/google` senza credenziali ora **reindirizza** a
+  `/?error=oauth_not_configured` invece del JSON 503; la landing mostra un banner
+  d'errore amichevole per tutti i casi OAuth (`not_admin`, `oauth_failed`, …).
+  Nota: in prod, con le credenziali impostate, "Connect Workspace" porta al consenso
+  Google — l'errore era solo un artefatto del dev locale.
+
 ## Tema dark dashboard + chiarimenti modello SaaS ✅ (2026-06-06)
 
 - ✅ **Dashboard in dark-navy** coerente con la landing: abilitato `dark` globale,

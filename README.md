@@ -25,7 +25,7 @@ low) in base alla sensibilità degli scope OAuth richiesti.
 | API         | Express 5 + Helmet + express-rate-limit |
 | DB          | PostgreSQL + Drizzle ORM |
 | Auth        | Google OAuth2 (Admin SDK) |
-| Billing     | Stripe (checkout + webhooks) |
+| Billing     | Stripe (checkout + webhooks) — **dormiente durante il lancio gratuito** (`LAUNCH_FREE`) |
 | Sessioni    | express-session + connect-pg-simple |
 | Contratti   | OpenAPI → codegen Orval (hook React Query) + Zod (validazione server) |
 | Frontend    | React + Vite + TanStack Query + wouter + shadcn/ui + recharts |
@@ -96,7 +96,8 @@ senza un Google Workspace. Imposta `SCAN_PROVIDER=google` per la scansione vera.
 - **Dettaglio app** (`/apps/:id`): scope con descrizioni, utenti autorizzati,
   punteggio di rischio + motivazioni, azione dismiss.
 - **Scansioni** (`/scans`): storico con polling live durante la scansione attiva.
-- **Billing** (`/billing`): checkout + portal Stripe, stato abbonamento.
+- **Plan** (`/billing`): durante il **lancio gratuito** mostra "all features free";
+  Stripe è dormiente (vedi sotto).
 
 ---
 

@@ -2,6 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { db, scansTable, organizationsTable, subscriptionsTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { createScan, executeScan } from "../lib/scan-service";
+import { isEntitled } from "../lib/entitlements";
 
 const router: IRouter = Router();
 
@@ -43,12 +44,8 @@ router.post("/scans/trigger", async (req, res): Promise<void> => {
   const orgId = req.session.organizationId!;
 
   const [sub] = await db.select().from(subscriptionsTable).where(eq(subscriptionsTable.organizationId, orgId));
-  const now = new Date();
-  const canScan =
-    sub?.status === "active" ||
-    (sub?.status === "trial" && sub.trialEndsAt != null && sub.trialEndsAt > now);
 
-  if (!canScan) {
+  if (!isEntitled(sub)) {
     res.status(402).json({ error: "Subscription required to run scans" });
     return;
   }

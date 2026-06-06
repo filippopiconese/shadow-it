@@ -2,13 +2,15 @@ import { Router, type IRouter } from "express";
 import { db, organizationsTable, usersTable, subscriptionsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { createOAuth2Client, getAuthUrl, checkIsWorkspaceAdmin } from "../lib/google";
+import { isEntitled } from "../lib/entitlements";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
 router.get("/auth/google", (_req, res): void => {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-    res.status(503).json({ error: "Google OAuth is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET." });
+    // Redirect back to the landing with a friendly error instead of raw JSON.
+    res.redirect("/?error=oauth_not_configured");
     return;
   }
   const client = createOAuth2Client();
@@ -136,10 +138,7 @@ router.get("/auth/me", async (req, res): Promise<void> => {
       .from(subscriptionsTable)
       .where(eq(subscriptionsTable.organizationId, user.organizationId));
 
-    const now = new Date();
-    const isSubscribed =
-      sub?.status === "active" ||
-      (sub?.status === "trial" && sub.trialEndsAt != null && sub.trialEndsAt > now);
+    const isSubscribed = isEntitled(sub);
 
     res.json({
       id: user.id,

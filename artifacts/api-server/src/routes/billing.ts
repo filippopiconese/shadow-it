@@ -2,6 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { db, subscriptionsTable, usersTable, organizationsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { getStripeClient, PLAN_PRICE_ID } from "../lib/stripe";
+import { isEntitled, isLaunchFree } from "../lib/entitlements";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -25,18 +26,19 @@ router.get("/billing/status", async (req, res): Promise<void> => {
 
   const [sub] = await db.select().from(subscriptionsTable).where(eq(subscriptionsTable.organizationId, orgId));
 
+  // During the free launch every workspace is fully entitled at no cost.
+  if (isLaunchFree()) {
+    res.json({ isSubscribed: true, plan: "Launch", currentPeriodEnd: null, cancelAtPeriodEnd: false });
+    return;
+  }
+
   if (!sub) {
     res.json({ isSubscribed: false, cancelAtPeriodEnd: false });
     return;
   }
 
-  const now = new Date();
-  const isSubscribed =
-    sub.status === "active" ||
-    (sub.status === "trial" && sub.trialEndsAt != null && sub.trialEndsAt > now);
-
   res.json({
-    isSubscribed,
+    isSubscribed: isEntitled(sub),
     plan: sub.status === "active" ? "SMB" : sub.status === "trial" ? "Trial" : null,
     currentPeriodEnd: sub.currentPeriodEnd?.toISOString() ?? sub.trialEndsAt?.toISOString() ?? null,
     cancelAtPeriodEnd: sub.cancelAtPeriodEnd,

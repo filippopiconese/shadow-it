@@ -39,7 +39,7 @@ export function Layout({ children }: LayoutProps) {
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/apps", label: "Discovered Apps", icon: Grid },
     { href: "/scans", label: "Scan History", icon: Activity },
-    { href: "/billing", label: "Billing", icon: CreditCard },
+    { href: "/billing", label: "Plan", icon: CreditCard },
   ];
 
   const SidebarContent = () => (
