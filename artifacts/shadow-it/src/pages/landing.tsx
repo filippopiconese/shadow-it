@@ -70,7 +70,7 @@ export function LandingPage() {
             <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-14">Clear visibility in three steps</h2>
             <div className="grid md:grid-cols-3 gap-6">
               {[
-                { icon: Lock, title: "1. Connect securely", text: "Authenticate with your Google Workspace admin account. We only request token read permissions — never write access." },
+                { icon: Lock, title: "1. Connect securely", text: "Sign in with your Google Workspace super-admin account and approve read-only access — takes 30 seconds, no setup. Starts a 14-day free trial." },
                 { icon: Search, title: "2. We scan for risks", text: "Our engine analyzes every OAuth token granted by your users, categorizing apps by permissions and risk level." },
                 { icon: AlertCircle, title: "3. Mitigate instantly", text: "Review high-risk applications, see exactly who is using them, and act directly from your dashboard." },
               ].map((step) => (

@@ -6,6 +6,28 @@ Legenda: ✅ fatto · 🔄 in corso · ⬜ da fare
 
 ---
 
+## Tema dark dashboard + chiarimenti modello SaaS ✅ (2026-06-06)
+
+- ✅ **Dashboard in dark-navy** coerente con la landing: abilitato `dark` globale,
+  palette `.dark` rifinita (card più chiare del fondo per separazione), shell con
+  gradient `sg-app-bg`. Convertite tutte le pagine app (dashboard, apps, dettaglio,
+  scansioni, billing, 404, layout) dai colori hardcoded slate/white ai token
+  semantici (`bg-card`, `text-foreground`, `text-muted-foreground`, `border-border`)
+  + accenti indigo; grafici/tooltip recharts adattati al dark. Verificato con screenshot.
+- ✅ Home: step 1 chiarisce che serve un account **super-admin** + trial 14 giorni.
+
+### Modello SaaS (chiarito)
+- **Vendor**: configura UN solo `GOOGLE_CLIENT_ID/SECRET` (un Google Cloud project,
+  gratis — **non** serve possedere un Workspace). Per gli scope admin "restricted"
+  serve la **verifica app** Google prima della prod.
+- **Cliente**: il super-admin "collega" il proprio Workspace via consenso OAuth
+  (nessuna API key da inserire); org + token salvati per-tenant.
+- **Multi-tenant**: segregazione logica per `organizationId` su ogni query.
+
+### Backlog sicurezza (prod)
+- ⬜ Cifrare i token OAuth at-rest (oggi in chiaro nel DB).
+- ⬜ Test automatico di isolamento tra tenant.
+
 ## Rebrand — allineamento all'hub Micro SaaS ✅ (2026-06-03)
 
 A regime il sito sarà **shadowit.micro-saas.it**: lo stile ora segue il sito padre

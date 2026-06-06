@@ -89,15 +89,15 @@ export function AppList() {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Discovered Apps</h1>
-          <p className="text-slate-500 mt-1">All third-party OAuth applications connected to your workspace.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Discovered Apps</h1>
+          <p className="text-muted-foreground mt-1">All third-party OAuth applications connected to your workspace.</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setShowDismissed((v) => !v)}
-            className="text-slate-600 border-slate-200"
+            className="text-muted-foreground border-border"
           >
             {showDismissed ? <EyeOff className="w-4 h-4 mr-1.5" /> : <Eye className="w-4 h-4 mr-1.5" />}
             {showDismissed ? "Hide reviewed" : `Show reviewed (${dismissedCount})`}
@@ -107,7 +107,7 @@ export function AppList() {
             size="sm"
             onClick={handleExportCsv}
             disabled={!apps || apps.length === 0}
-            className="text-slate-600 border-slate-200"
+            className="text-muted-foreground border-border"
           >
             <Download className="w-4 h-4 mr-1.5" />
             Export CSV
@@ -117,16 +117,16 @@ export function AppList() {
 
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search by app name..."
-            className="pl-9 border-slate-200 focus-visible:ring-blue-500 h-10"
+            className="pl-9 border-border focus-visible:ring-blue-500 h-10"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="bg-white border border-slate-200 rounded-md flex items-center px-3 h-10 shadow-sm shrink-0">
-          <Filter className="w-4 h-4 text-slate-500 mr-2" />
+        <div className="bg-card border border-border rounded-md flex items-center px-3 h-10 shadow-sm shrink-0">
+          <Filter className="w-4 h-4 text-muted-foreground mr-2" />
           <Select value={riskFilter} onValueChange={(v) => setRiskFilter(v as ListAppsRisk | "all")}>
             <SelectTrigger className="border-0 shadow-none focus:ring-0 p-0 h-auto w-[130px] text-sm">
               <SelectValue placeholder="Risk Level" />
@@ -142,20 +142,20 @@ export function AppList() {
       </div>
 
       {(search || riskFilter !== "all") && apps && (
-        <div className="flex items-center gap-2 text-sm text-slate-500">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <span>Showing {displayed.length} of {apps.length} apps</span>
           <button
             onClick={() => { setSearch(""); setRiskFilter("all"); }}
-            className="text-blue-600 hover:underline"
+            className="text-indigo-400 hover:underline"
           >
             Clear filters
           </button>
         </div>
       )}
 
-      <Card className="border-slate-200 shadow-sm overflow-hidden">
+      <Card className="border-border shadow-sm overflow-hidden">
         {isLoading ? (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-border">
             {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -170,8 +170,8 @@ export function AppList() {
             ))}
           </div>
         ) : displayed.length > 0 ? (
-          <div className="divide-y divide-slate-100">
-            <div className="grid grid-cols-12 gap-4 p-3 text-xs font-semibold text-slate-500 bg-slate-50/80 border-b border-slate-100 uppercase tracking-wider">
+          <div className="divide-y divide-border">
+            <div className="grid grid-cols-12 gap-4 p-3 text-xs font-semibold text-muted-foreground bg-muted/60 border-b border-border uppercase tracking-wider">
               <div className="col-span-5">Application</div>
               <div className="col-span-2 text-center">Risk</div>
               <div className="col-span-2 text-center">Users</div>
@@ -180,49 +180,49 @@ export function AppList() {
             </div>
             {displayed.map((app) => (
               <Link key={app.id} href={`/apps/${app.id}`}>
-                <div className={`grid grid-cols-12 gap-4 p-4 items-center hover:bg-slate-50 transition-colors cursor-pointer group ${app.isDismissed || app.status === "removed" ? "opacity-60" : ""}`}>
+                <div className={`grid grid-cols-12 gap-4 p-4 items-center hover:bg-muted/50 transition-colors cursor-pointer group ${app.isDismissed || app.status === "removed" ? "opacity-60" : ""}`}>
                   <div className="col-span-5 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg border border-slate-200 bg-white flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-lg border border-border bg-card flex items-center justify-center shrink-0">
                       {app.iconUrl ? (
                         <img src={app.iconUrl} alt={app.appName} className="w-6 h-6 object-contain" />
                       ) : (
-                        <AppWindow className="w-5 h-5 text-slate-400" />
+                        <AppWindow className="w-5 h-5 text-muted-foreground" />
                       )}
                     </div>
                     <div className="min-w-0">
-                      <div className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors truncate flex items-center gap-2">
+                      <div className="font-semibold text-foreground group-hover:text-indigo-400 transition-colors truncate flex items-center gap-2">
                         {app.appName}
                         {app.status === "removed" && (
                           <Badge variant="outline" className="text-xs text-amber-600 border-amber-200 bg-amber-50 font-normal py-0 px-1.5">Revoked</Badge>
                         )}
                         {app.isDismissed && (
-                          <Badge variant="outline" className="text-xs text-slate-400 border-slate-200 font-normal py-0 px-1.5">Reviewed</Badge>
+                          <Badge variant="outline" className="text-xs text-muted-foreground border-border font-normal py-0 px-1.5">Reviewed</Badge>
                         )}
                       </div>
-                      <div className="text-xs text-slate-500 truncate mt-0.5">{app.category}</div>
+                      <div className="text-xs text-muted-foreground truncate mt-0.5">{app.category}</div>
                     </div>
                   </div>
                   <div className="col-span-2 flex justify-center">
                     <RiskBadge level={app.riskLevel} />
                   </div>
-                  <div className="col-span-2 flex items-center justify-center text-sm font-medium text-slate-700">
-                    <Users className="w-4 h-4 mr-1.5 text-slate-400" />
+                  <div className="col-span-2 flex items-center justify-center text-sm font-medium text-foreground">
+                    <Users className="w-4 h-4 mr-1.5 text-muted-foreground" />
                     {app.userCount}
                   </div>
-                  <div className="col-span-2 text-right text-sm text-slate-500">
+                  <div className="col-span-2 text-right text-sm text-muted-foreground">
                     {format(new Date(app.firstSeenAt), "MMM d, yyyy")}
                   </div>
                   <div className="col-span-1 flex justify-end">
                     {!app.isDismissed ? (
                       <button
                         onClick={(e) => handleDismiss(e, app.id)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-md hover:bg-emerald-50 text-slate-400 hover:text-emerald-600"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-md hover:bg-emerald-50 text-muted-foreground hover:text-emerald-600"
                         title="Mark as reviewed"
                       >
                         <CheckCircle2 className="w-4 h-4" />
                       </button>
                     ) : (
-                      <ArrowRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <ArrowRight className="w-4 h-4 text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity" />
                     )}
                   </div>
                 </div>
@@ -230,11 +230,11 @@ export function AppList() {
             ))}
           </div>
         ) : (
-          <div className="p-16 text-center text-slate-500 flex flex-col items-center">
-            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-              <Search className="w-8 h-8 text-slate-400" />
+          <div className="p-16 text-center text-muted-foreground flex flex-col items-center">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+              <Search className="w-8 h-8 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-1">No applications found</h3>
+            <h3 className="text-lg font-semibold text-foreground mb-1">No applications found</h3>
             <p className="text-sm">
               {apps && apps.length > 0
                 ? "No apps match your current filters."

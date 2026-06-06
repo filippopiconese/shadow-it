@@ -46,12 +46,12 @@ export function Billing() {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-4xl mx-auto">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Billing & Subscription</h1>
-        <p className="text-slate-500 mt-1">Manage your ShadowGuard plan and payment methods.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Billing & Subscription</h1>
+        <p className="text-muted-foreground mt-1">Manage your ShadowGuard plan and payment methods.</p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <Card className="border-slate-200 shadow-sm relative overflow-hidden flex flex-col">
+        <Card className="border-border shadow-sm relative overflow-hidden flex flex-col">
           <div className="absolute top-0 right-0 p-6 opacity-5">
             <Shield className="w-32 h-32" />
           </div>
@@ -65,26 +65,26 @@ export function Billing() {
           </CardHeader>
           <CardContent className="relative z-10 flex-1">
             <div className="mb-6">
-              <span className="text-4xl font-black text-slate-900">
+              <span className="text-4xl font-black text-foreground">
                 {status?.isSubscribed ? "€39" : "€0"}
               </span>
-              <span className="text-slate-500 font-medium ml-1">/month</span>
+              <span className="text-muted-foreground font-medium ml-1">/month</span>
             </div>
             
             {status?.currentPeriodEnd && (
-              <div className="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <span className="font-medium text-slate-900">
+              <div className="text-sm text-muted-foreground bg-muted/40 p-3 rounded-lg border border-border">
+                <span className="font-medium text-foreground">
                   {status.cancelAtPeriodEnd ? "Access ends:" : "Next billing date:"}
                 </span>{" "}
                 {format(new Date(status.currentPeriodEnd), "MMMM d, yyyy")}
               </div>
             )}
           </CardContent>
-          <CardFooter className="relative z-10 pt-4 border-t border-slate-100 bg-slate-50/50">
+          <CardFooter className="relative z-10 pt-4 border-t border-border bg-muted/30">
             {status?.isSubscribed ? (
               <Button 
                 variant="outline" 
-                className="w-full bg-white" 
+                className="w-full"
                 onClick={handleManage}
                 disabled={createPortal.isPending}
               >
@@ -93,7 +93,7 @@ export function Billing() {
               </Button>
             ) : (
               <Button 
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                 onClick={handleUpgrade}
                 disabled={createCheckout.isPending}
               >
@@ -104,7 +104,7 @@ export function Billing() {
           </CardFooter>
         </Card>
 
-        <Card className="border-slate-200 shadow-sm bg-slate-900 text-white">
+        <Card className="border-border shadow-sm bg-slate-900 text-white">
           <CardHeader>
             <CardTitle className="text-slate-100">Pro Features</CardTitle>
             <CardDescription className="text-slate-400">Everything you need for complete workspace security.</CardDescription>

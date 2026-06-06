@@ -58,8 +58,8 @@ export function AppDetail() {
   if (!app) {
     return (
       <div className="text-center py-20">
-        <h2 className="text-2xl font-bold text-slate-900">Application not found</h2>
-        <Link href="/apps" className="text-blue-600 mt-4 inline-block hover:underline">
+        <h2 className="text-2xl font-bold text-foreground">Application not found</h2>
+        <Link href="/apps" className="text-indigo-400 mt-4 inline-block hover:underline">
           Return to application list
         </Link>
       </div>
@@ -68,21 +68,21 @@ export function AppDetail() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <Link href="/apps" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors mb-2">
+      <Link href="/apps" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-2">
         <ArrowLeft className="w-4 h-4 mr-1.5" /> Back to applications
       </Link>
 
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-border">
         <div className="flex items-center gap-5">
-          <div className="w-16 h-16 rounded-2xl border border-slate-200 bg-white flex items-center justify-center shrink-0 shadow-sm overflow-hidden">
+          <div className="w-16 h-16 rounded-2xl border border-border bg-card flex items-center justify-center shrink-0 shadow-sm overflow-hidden">
             {app.iconUrl ? (
               <img src={app.iconUrl} alt={app.appName} className="w-10 h-10 object-contain" />
             ) : (
-              <AppWindow className="w-8 h-8 text-slate-400" />
+              <AppWindow className="w-8 h-8 text-muted-foreground" />
             )}
           </div>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
               {app.appName}
               {app.isDismissed && (
                 <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 font-medium">
@@ -90,16 +90,16 @@ export function AppDetail() {
                 </Badge>
               )}
             </h1>
-            <div className="flex items-center gap-4 mt-2 text-sm text-slate-600">
-              <span className="bg-slate-100 px-2 py-0.5 rounded text-xs font-medium uppercase tracking-wider text-slate-600">
+            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+              <span className="bg-muted px-2 py-0.5 rounded text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {app.category}
               </span>
               <span className="flex items-center">
-                <Users className="w-4 h-4 mr-1.5 text-slate-400" />
+                <Users className="w-4 h-4 mr-1.5 text-muted-foreground" />
                 {app.userCount} authorized users
               </span>
               <span className="flex items-center">
-                <CalendarDays className="w-4 h-4 mr-1.5 text-slate-400" />
+                <CalendarDays className="w-4 h-4 mr-1.5 text-muted-foreground" />
                 Seen {format(new Date(app.firstSeenAt), 'MMM d, yyyy')}
               </span>
             </div>
@@ -107,7 +107,7 @@ export function AppDetail() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="border-slate-200 hover:bg-slate-50">
+          <Button variant="outline" className="border-border hover:bg-muted/50">
             <ExternalLink className="w-4 h-4 mr-2" /> Google Workspace Admin
           </Button>
           {!app.isDismissed && (
@@ -120,15 +120,15 @@ export function AppDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <Card className="border-slate-200 shadow-sm">
-            <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+          <Card className="border-border shadow-sm">
+            <CardHeader className="border-b border-border bg-muted/30">
               <CardTitle className="text-lg flex items-center gap-2">
-                <Key className="w-5 h-5 text-slate-500" />
+                <Key className="w-5 h-5 text-muted-foreground" />
                 Requested Permissions (Scopes)
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-border">
                 {app.scopeDescriptions.map((desc, idx) => {
                   const isHighRisk = desc.toLowerCase().includes('read') || desc.toLowerCase().includes('write') || desc.toLowerCase().includes('drive') || desc.toLowerCase().includes('mail');
                   return (
@@ -137,12 +137,12 @@ export function AppDetail() {
                         {isHighRisk ? (
                           <AlertTriangle className="w-5 h-5 text-amber-500" />
                         ) : (
-                          <CheckCircle2 className="w-5 h-5 text-slate-300" />
+                          <CheckCircle2 className="w-5 h-5 text-muted-foreground/50" />
                         )}
                       </div>
                       <div>
-                        <p className={`font-medium ${isHighRisk ? 'text-slate-900' : 'text-slate-700'}`}>{desc}</p>
-                        <p className="text-xs text-slate-500 font-mono mt-1 mt-1 break-all">{app.scopes[idx]}</p>
+                        <p className={`font-medium ${isHighRisk ? 'text-foreground' : 'text-foreground'}`}>{desc}</p>
+                        <p className="text-xs text-muted-foreground font-mono mt-1 mt-1 break-all">{app.scopes[idx]}</p>
                       </div>
                     </li>
                   );
@@ -151,10 +151,10 @@ export function AppDetail() {
             </CardContent>
           </Card>
 
-          <Card className="border-slate-200 shadow-sm">
-            <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+          <Card className="border-border shadow-sm">
+            <CardHeader className="border-b border-border bg-muted/30">
               <CardTitle className="text-lg flex items-center gap-2">
-                <Users className="w-5 h-5 text-slate-500" />
+                <Users className="w-5 h-5 text-muted-foreground" />
                 Authorized Users
               </CardTitle>
               <CardDescription>Users who have granted access to this application</CardDescription>
@@ -162,7 +162,7 @@ export function AppDetail() {
             <CardContent className="p-4">
               <div className="flex flex-wrap gap-2">
                 {app.authorizedUsers.map(email => (
-                  <Badge key={email} variant="secondary" className="bg-slate-100 text-slate-700 hover:bg-slate-200 font-normal py-1 px-3">
+                  <Badge key={email} variant="secondary" className="bg-muted text-foreground hover:bg-muted/70 font-normal py-1 px-3">
                     {email}
                   </Badge>
                 ))}
@@ -172,7 +172,7 @@ export function AppDetail() {
         </div>
 
         <div className="space-y-6">
-          <Card className={`border-slate-200 shadow-sm overflow-hidden ${
+          <Card className={`border-border shadow-sm overflow-hidden ${
             app.riskLevel === 'high' ? 'border-red-200 ring-1 ring-red-100' : ''
           }`}>
             <div className={`h-2 w-full ${
@@ -180,49 +180,49 @@ export function AppDetail() {
               app.riskLevel === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'
             }`} />
             <CardHeader className="pb-4">
-              <CardTitle className="text-sm text-slate-500 font-medium uppercase tracking-wider">Risk Assessment</CardTitle>
+              <CardTitle className="text-sm text-muted-foreground font-medium uppercase tracking-wider">Risk Assessment</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-end justify-between">
                 <div>
-                  <div className="text-5xl font-black tracking-tighter text-slate-900">{app.riskScore}</div>
-                  <div className="text-sm text-slate-500 mt-1 font-medium">Out of 100</div>
+                  <div className="text-5xl font-black tracking-tighter text-foreground">{app.riskScore}</div>
+                  <div className="text-sm text-muted-foreground mt-1 font-medium">Out of 100</div>
                 </div>
                 <RiskBadge level={app.riskLevel} className="px-3 py-1.5 text-sm" />
               </div>
               
-              <div className="pt-4 border-t border-slate-100">
-                <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                  <ShieldAlert className="w-4 h-4 text-slate-500" /> Risk Factors
+              <div className="pt-4 border-t border-border">
+                <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <ShieldAlert className="w-4 h-4 text-muted-foreground" /> Risk Factors
                 </h4>
                 <ul className="space-y-2.5">
                   {app.riskReasons.map((reason, idx) => (
-                    <li key={idx} className="text-sm text-slate-600 flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-1.5 shrink-0" />
+                    <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 mt-1.5 shrink-0" />
                       {reason}
                     </li>
                   ))}
                   {app.riskReasons.length === 0 && (
-                    <li className="text-sm text-slate-500 italic">No significant risk factors identified.</li>
+                    <li className="text-sm text-muted-foreground italic">No significant risk factors identified.</li>
                   )}
                 </ul>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-slate-200 shadow-sm bg-slate-50">
-            <CardContent className="p-4 text-sm text-slate-600">
+          <Card className="border-border shadow-sm bg-muted/40">
+            <CardContent className="p-4 text-sm text-muted-foreground">
               <div className="flex flex-col gap-2">
-                <div className="flex justify-between border-b border-slate-200 pb-2">
-                  <span className="font-medium text-slate-900">Client ID</span>
-                  <span className="font-mono text-xs text-slate-500 truncate ml-4 w-32" title={app.clientId}>{app.clientId}</span>
+                <div className="flex justify-between border-b border-border pb-2">
+                  <span className="font-medium text-foreground">Client ID</span>
+                  <span className="font-mono text-xs text-muted-foreground truncate ml-4 w-32" title={app.clientId}>{app.clientId}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-200 pb-2 pt-1">
-                  <span className="font-medium text-slate-900">First Discovered</span>
+                <div className="flex justify-between border-b border-border pb-2 pt-1">
+                  <span className="font-medium text-foreground">First Discovered</span>
                   <span>{format(new Date(app.firstSeenAt), 'MMM d, yyyy')}</span>
                 </div>
                 <div className="flex justify-between pt-1">
-                  <span className="font-medium text-slate-900">Last Seen</span>
+                  <span className="font-medium text-foreground">Last Seen</span>
                   <span>{format(new Date(app.lastSeenAt), 'MMM d, yyyy')}</span>
                 </div>
               </div>
