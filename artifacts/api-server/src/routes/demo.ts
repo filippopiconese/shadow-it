@@ -92,7 +92,10 @@ router.post("/demo/login", async (req, res): Promise<void> => {
     });
   } catch (err) {
     logger.error({ err }, "Demo login failed");
-    res.status(500).json({ error: String(err) });
+    // Surface the root cause (e.g. the underlying Postgres error) so it shows up
+    // in the UI banner / response instead of just the wrapped query text.
+    const cause = (err as { cause?: { message?: string } })?.cause?.message;
+    res.status(500).json({ error: cause ?? String(err) });
   }
 });
 

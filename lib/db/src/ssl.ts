@@ -11,8 +11,9 @@ export function dbSsl(): false | { rejectUnauthorized: false } {
   if (flag === "true") return { rejectUnauthorized: false };
   if (flag === "false") return false;
 
+  // SSL ON for any remote host (managed Postgres like Railway require it, even
+  // on the private network). OFF only for local development.
   const url = process.env.DATABASE_URL ?? "";
-  const isLocalOrPrivate =
-    /localhost|127\.0\.0\.1|\[::1\]|\.railway\.internal|host\.docker\.internal/.test(url);
-  return isLocalOrPrivate ? false : { rejectUnauthorized: false };
+  const isLocal = /localhost|127\.0\.0\.1|\[::1\]|host\.docker\.internal/.test(url);
+  return isLocal ? false : { rejectUnauthorized: false };
 }
