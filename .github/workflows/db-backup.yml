@@ -1,0 +1,88 @@
+name: PostgreSQL Daily Backup → R2
+
+on:
+  schedule:
+    # Every day at 02:00 UTC (03:00 ora italiana in inverno, 04:00 in estate)
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Avvio manuale dalla tab Actions
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Install PostgreSQL client 18
+        run: |
+          sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client-18
+          pg_dump --version
+
+      - name: Dump database
+        env:
+          DATABASE_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
+        run: |
+          set -euo pipefail
+
+          export PGPASSWORD=$(echo "$DATABASE_URL" | sed 's|.*://[^:]*:\([^@]*\)@.*|\1|')
+          DB_USER=$(echo "$DATABASE_URL" | sed 's|.*://\([^:]*\):.*|\1|')
+          DB_HOST=$(echo "$DATABASE_URL" | sed 's|.*@\([^:]*\):.*|\1|')
+          DB_PORT=$(echo "$DATABASE_URL" | sed 's|.*:\([0-9]*\)/.*|\1|')
+          DB_NAME=$(echo "$DATABASE_URL" | sed 's|.*/\([^?]*\).*|\1|')
+
+          echo "Connecting to $DB_HOST:$DB_PORT/$DB_NAME as $DB_USER"
+
+          /usr/lib/postgresql/18/bin/pg_dump \
+            --host="$DB_HOST" \
+            --port="$DB_PORT" \
+            --username="$DB_USER" \
+            --dbname="$DB_NAME" \
+            --no-password \
+            --format=plain \
+            --no-owner \
+            --no-acl \
+            | gzip > backup.sql.gz
+
+          BACKUP_SIZE=$(du -sh backup.sql.gz | cut -f1)
+          echo "Backup size: $BACKUP_SIZE"
+
+          # Fallisce se il dump è vuoto (< 100 bytes = qualcosa è andato storto)
+          BYTES=$(stat -c%s backup.sql.gz)
+          if [ "$BYTES" -lt 100 ]; then
+            echo "ERROR: backup.sql.gz is only ${BYTES} bytes — pg_dump likely failed"
+            exit 1
+          fi
+
+      - name: Test R2 connectivity
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: |
+          echo "Testing R2 connectivity..."
+          echo "Endpoint: ${{ vars.R2_ENDPOINT_URL }}"
+          echo "Bucket: ${{ vars.R2_BACKUP_BUCKET }}"
+          aws s3 ls "s3://${{ vars.R2_BACKUP_BUCKET }}" \
+            --endpoint-url "${{ vars.R2_ENDPOINT_URL }}" \
+            --region auto
+          echo "R2 connectivity OK"
+
+      - name: Upload to Cloudflare R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: |
+          DAY=$(date +%A | tr '[:upper:]' '[:lower:]')
+          FILENAME="backup-${DAY}.sql.gz"
+
+          aws s3 cp backup.sql.gz "s3://${{ vars.R2_BACKUP_BUCKET }}/${FILENAME}" \
+            --endpoint-url "${{ vars.R2_ENDPOINT_URL }}" \
+            --region auto
+
+          echo "Uploaded as: ${FILENAME}"
+          echo "Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+
+      - name: Cleanup local dump
+        if: always()
+        run: rm -f backup.sql.gz
