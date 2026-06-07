@@ -158,9 +158,9 @@ export function LandingPage() {
 
           <div className="grid md:grid-cols-2 gap-6">
             {/* Free */}
-            <div className="sg-glass p-8">
-              <span className="sg-badge mb-4">Coming soon</span>
-              <h3 className="text-2xl font-bold text-white mt-4">Free</h3>
+            <div className="sg-glass p-8 relative">
+              <span className="absolute -top-3 left-8 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-white" style={{ background: "linear-gradient(135deg,#6366f1,#4338ca)" }}>Coming soon</span>
+              <h3 className="text-2xl font-bold text-white">Free</h3>
               <div className="flex items-baseline gap-1 mt-2 mb-2">
                 <span className="text-5xl font-extrabold text-white">€0</span>
                 <span className="font-medium" style={{ color: "#94a3b8" }}>/month</span>
