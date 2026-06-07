@@ -168,16 +168,13 @@ export function LandingPage() {
               <p className="mb-6" style={{ color: "#94a3b8" }}>Core visibility for teams getting started.</p>
               <ul className="space-y-3">
                 {[
-                  ["Manual workspace scans", true],
-                  ["OAuth app inventory & risk scoring", true],
-                  ["Per-app scopes & authorized users", true],
-                  ["CSV export", true],
-                  ["Automatic scheduled scans", false],
-                  ["New high-risk app email alerts", false],
-                  ["Revoked-app history (diff)", false],
-                ].map(([label, on]) => (
-                  <li key={label as string} className="flex items-center gap-3 text-sm" style={{ color: on ? "#e2e8f0" : "#64748b" }}>
-                    {on ? <CheckCircle2 className="w-4 h-4 shrink-0" style={{ color: "#22d3ee" }} /> : <span className="w-4 text-center shrink-0">—</span>}
+                  "Manual workspace scans",
+                  "OAuth app inventory & risk scoring",
+                  "Per-app scopes & authorized users",
+                  "CSV export",
+                ].map((label) => (
+                  <li key={label} className="flex items-center gap-3 text-sm" style={{ color: "#e2e8f0" }}>
+                    <CheckCircle2 className="w-4 h-4 shrink-0" style={{ color: "#22d3ee" }} />
                     {label}
                   </li>
                 ))}
