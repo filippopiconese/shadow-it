@@ -1,16 +1,13 @@
 import { useGetBillingStatus } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle2, Rocket } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 
-const FREE_FEATURES: Array<[string, boolean]> = [
-  ["Manual workspace scans", true],
-  ["OAuth app inventory & risk scoring", true],
-  ["Per-app scopes & authorized users", true],
-  ["CSV export", true],
-  ["Automatic scheduled scans", false],
-  ["High-risk app email alerts", false],
-  ["Revoked-app history (diff)", false],
+const FREE_FEATURES = [
+  "Manual workspace scans",
+  "OAuth app inventory & risk scoring",
+  "Per-app scopes & authorized users",
+  "CSV export",
 ];
 
 const PRO_FEATURES = [
@@ -73,12 +70,10 @@ export function Billing() {
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Free */}
-        <Card className="border-border shadow-sm">
+        <Card className="border-border shadow-sm relative">
+          <span className="absolute -top-3 left-8 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-white z-10" style={{ background: "linear-gradient(135deg,#6366f1,#4338ca)" }}>Coming soon</span>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              Free
-              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Coming soon</span>
-            </CardTitle>
+            <CardTitle>Free</CardTitle>
             <CardDescription>Core visibility for teams getting started.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -87,9 +82,9 @@ export function Billing() {
               <span className="text-muted-foreground font-medium ml-1">/month</span>
             </div>
             <ul className="space-y-3">
-              {FREE_FEATURES.map(([label, on]) => (
-                <li key={label} className={`flex items-center gap-3 text-sm ${on ? "text-foreground" : "text-muted-foreground/60"}`}>
-                  {on ? <CheckCircle2 className="w-4 h-4 shrink-0 text-cyan-400" /> : <span className="w-4 text-center shrink-0">—</span>}
+              {FREE_FEATURES.map((label) => (
+                <li key={label} className="flex items-center gap-3 text-sm text-foreground">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-cyan-400" />
                   {label}
                 </li>
               ))}
@@ -99,15 +94,13 @@ export function Billing() {
 
         {/* Pro */}
         <Card className="border-primary/40 shadow-sm relative">
+          <span className="absolute -top-3 left-8 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-white z-10" style={{ background: "linear-gradient(135deg,#6366f1,#4338ca)" }}>Coming soon</span>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              Pro
-              <Rocket className="w-4 h-4 text-indigo-400" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-300">Coming soon</span>
-            </CardTitle>
+            <CardTitle>Pro</CardTitle>
             <CardDescription>For teams that need continuous coverage.</CardDescription>
           </CardHeader>
           <CardContent>
+            <p className="text-sm font-medium text-foreground mb-5">Full automation &amp; alerting.</p>
             <ul className="space-y-3">
               {PRO_FEATURES.map((label) => (
                 <li key={label} className="flex items-center gap-3 text-sm text-foreground">
