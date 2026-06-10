@@ -8,15 +8,6 @@
 
 export interface EmailSettings {
   /** @nullable */
-  smtpHost?: string | null;
-  /** @nullable */
-  smtpPort?: number | null;
-  smtpSecure: boolean;
-  /** @nullable */
-  smtpUser?: string | null;
-  /** @nullable */
-  emailFrom?: string | null;
-  /** @nullable */
   alertEmails?: string | null;
-  hasPassword: boolean;
+  senderConfigured: boolean;
 }

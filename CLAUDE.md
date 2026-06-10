@@ -22,7 +22,7 @@ Fa parte della famiglia **Micro SaaS** (hub: `../micro-saas`, sito padre
 - Auth: **Google OAuth2 + Admin SDK** (`googleapis`).
 - Frontend: **React + Vite + TanStack Query + wouter + shadcn/ui + recharts**, Tailwind v4.
 - Contratti: **OpenAPI → codegen Orval** (hook React Query) + **Zod** (validazione server).
-- Email: **nodemailer** (SMTP per-cliente).
+- Email: **Resend** (API HTTPS — Railway blocca SMTP in uscita).
 
 ## Comandi
 
@@ -79,10 +79,15 @@ Dockerfile, railway.json, docker-compose.yml, .env.example
 - **Entitlement / pricing**: `lib/entitlements.ts`. `LAUNCH_FREE=true` (default) →
   tutti entitled, **Stripe dormiente**. Le route Stripe esistono ma non sono usate.
 - **Cifratura at-rest**: `lib/crypto.ts` (AES-256-GCM, `TOKEN_ENCRYPTION_KEY`). Cifra
-  i **token OAuth** e la **password SMTP**. Formato `enc:v1:…`; i valori senza prefisso
+  i **token OAuth**. Formato `enc:v1:…`; i valori senza prefisso
   passano invariati (no migrazione). Senza chiave → fallback in chiaro (warn; error in prod).
-- **Email/alert**: `lib/email.ts`. SMTP **per-organizzazione** (pagina Settings) →
-  le mail partono dall'infra del cliente. Fallback: `SMTP_*` env, poi log.
+- **Email/alert**: `lib/email.ts`. Invio **vendor-managed via API Resend** (HTTPS):
+  Railway blocca le porte SMTP in uscita, quindi niente `nodemailer`. Le mail partono
+  dal nostro dominio (`EMAIL_FROM`, default `alerts@shadowit.micro-saas.it`); il cliente
+  configura solo i **destinatari** (`alertEmails`, pagina Settings). Senza `RESEND_API_KEY`
+  gli alert vengono loggati, non inviati. NB: le colonne `smtp_*` su `organizations`
+  restano nello schema ma sono **inutilizzate** (cleanup futuro), e `nodemailer` resta
+  in `package.json` ma non è più importato.
 - **Multi-tenant**: ogni query è filtrata per `organizationId` (dalla sessione).
   Coperto da `pnpm test:isolation`.
 - **Demo pubblica** (`routes/demo.ts`, `/api/demo/*`): sandbox sull'org `demo-acme.com`,
@@ -107,7 +112,8 @@ Dockerfile, railway.json, docker-compose.yml, .env.example
 | `LAUNCH_FREE` | `true` = tutto gratis, no Stripe. |
 | `DEMO_ENABLED` | `true` = demo pubblica attiva. |
 | `SCAN_INTERVAL_HOURS` / `ENABLE_SCHEDULER` | scheduler scansioni. |
-| `SMTP_*` / `EMAIL_FROM` | fallback globale SMTP (opzionale; preferibile per-org). |
+| `RESEND_API_KEY` | API key Resend per l'invio alert (HTTPS). Senza → alert loggati. |
+| `EMAIL_FROM` | mittente alert (dominio verificato su Resend). Default `alerts@shadowit.micro-saas.it`. |
 
 ## Gotchas
 

@@ -6,6 +6,27 @@ Legenda: ✅ fatto · 🔄 in corso · ⬜ da fare
 
 ---
 
+## Email via API Resend (SMTP bloccato su Railway) ✅ (2026-06-10)
+
+- **Problema**: Railway **blocca le porte SMTP in uscita** (25/465/587), permette solo
+  HTTP/HTTPS. L'invio alert via `nodemailer`/SMTP (per-org o env `SMTP_*`) non si
+  connette mai in produzione, indipendentemente dalle credenziali.
+- ✅ **Switch a invio vendor-managed via API Resend (HTTPS)** — decisione di prodotto:
+  le mail partono dal **nostro** dominio verificato (`EMAIL_FROM`, default
+  `alerts@shadowit.micro-saas.it`); il cliente configura solo i **destinatari**.
+  Zero attrito, deliverability gestita da noi. (Il motivo originario del per-org SMTP
+  decadeva comunque, dato che Railway non apre SMTP.)
+- ✅ **`lib/email.ts` riscritto**: niente `nodemailer`, invio via `fetch` nativo a
+  `https://api.resend.com/emails` con `RESEND_API_KEY`. `isEmailConfigured()` espone se
+  il provider è attivo. Senza key → alert loggati, non inviati.
+- ✅ **Settings semplificati** (contract-first): `EmailSettings`/`EmailSettingsInput`
+  ridotti a `alertEmails` (+ `senderConfigured`). UI: solo campo destinatari + banner
+  "alerts non attivi" se il provider non è configurato; test inviabile solo se attivo.
+  Codegen rigenerato. Typecheck workspace verde.
+- ⬜ **Cleanup futuro** (non bloccante): rimuovere le colonne `smtp_*` da `organizations`
+  (ora inutilizzate) e la dipendenza `nodemailer` da `package.json` (lasciata per non
+  toccare il lockfile). Su Railway impostare `RESEND_API_KEY` + dominio verificato.
+
 ## SMTP per-cliente + deploy Railway ✅ (2026-06-06)
 
 - ✅ **SMTP per-organizzazione**: ogni cliente configura il proprio SMTP dalla nuova

@@ -251,10 +251,10 @@ paths:
     get:
       operationId: getEmailSettings
       tags: [settings]
-      summary: Get the organization's alert email (SMTP) settings
+      summary: Get the organization's alert email recipients
       responses:
         "200":
-          description: Email settings (never returns the SMTP password)
+          description: Alert email settings
           content:
             application/json:
               schema:
@@ -262,7 +262,7 @@ paths:
     put:
       operationId: updateEmailSettings
       tags: [settings]
-      summary: Update the organization's alert email (SMTP) settings
+      summary: Update the organization's alert email recipients
       requestBody:
         required: true
         content:
@@ -281,7 +281,7 @@ paths:
     post:
       operationId: testEmailSettings
       tags: [settings]
-      summary: Send a test alert email using the saved SMTP settings
+      summary: Send a test alert email to the configured recipients
       responses:
         "200":
           description: Test email sent
@@ -316,37 +316,17 @@ components:
     EmailSettings:
       type: object
       properties:
-        smtpHost:
-          type: ["string", "null"]
-        smtpPort:
-          type: ["integer", "null"]
-        smtpSecure:
-          type: boolean
-        smtpUser:
-          type: ["string", "null"]
-        emailFrom:
-          type: ["string", "null"]
         alertEmails:
           type: ["string", "null"]
-        hasPassword:
+        # Whether the vendor email provider (Resend) is configured server-side,
+        # i.e. whether alerts can actually be delivered.
+        senderConfigured:
           type: boolean
-      required: [smtpSecure, hasPassword]
+      required: [senderConfigured]
 
     EmailSettingsInput:
       type: object
       properties:
-        smtpHost:
-          type: ["string", "null"]
-        smtpPort:
-          type: ["integer", "null"]
-        smtpSecure:
-          type: boolean
-        smtpUser:
-          type: ["string", "null"]
-        smtpPass:
-          type: ["string", "null"]
-        emailFrom:
-          type: ["string", "null"]
         alertEmails:
           type: ["string", "null"]
 

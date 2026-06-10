@@ -1030,7 +1030,7 @@ export const getGetEmailSettingsUrl = () => {
 }
 
 /**
- * @summary Get the organization's alert email (SMTP) settings
+ * @summary Get the organization's alert email recipients
  */
 export const getEmailSettings = async ( options?: RequestInit): Promise<EmailSettings> => {
 
@@ -1077,7 +1077,7 @@ export type GetEmailSettingsQueryError = ErrorType<unknown>
 
 
 /**
- * @summary Get the organization's alert email (SMTP) settings
+ * @summary Get the organization's alert email recipients
  */
 
 export function useGetEmailSettings<TData = Awaited<ReturnType<typeof getEmailSettings>>, TError = ErrorType<unknown>>(
@@ -1107,7 +1107,7 @@ export const getUpdateEmailSettingsUrl = () => {
 }
 
 /**
- * @summary Update the organization's alert email (SMTP) settings
+ * @summary Update the organization's alert email recipients
  */
 export const updateEmailSettings = async (emailSettingsInput: EmailSettingsInput, options?: RequestInit): Promise<EmailSettings> => {
 
@@ -1156,7 +1156,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type UpdateEmailSettingsMutationError = ErrorType<unknown>
 
     /**
- * @summary Update the organization's alert email (SMTP) settings
+ * @summary Update the organization's alert email recipients
  */
 export const useUpdateEmailSettings = <TError = ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateEmailSettings>>, TError,{data: BodyType<EmailSettingsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -1178,7 +1178,7 @@ export const getTestEmailSettingsUrl = () => {
 }
 
 /**
- * @summary Send a test alert email using the saved SMTP settings
+ * @summary Send a test alert email to the configured recipients
  */
 export const testEmailSettings = async ( options?: RequestInit): Promise<SuccessResponse> => {
 
@@ -1226,7 +1226,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type TestEmailSettingsMutationError = ErrorType<unknown>
 
     /**
- * @summary Send a test alert email using the saved SMTP settings
+ * @summary Send a test alert email to the configured recipients
  */
 export const useTestEmailSettings = <TError = ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof testEmailSettings>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
