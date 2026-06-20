@@ -44,14 +44,14 @@ export async function executeScan(scanId: number, orgId: number): Promise<void> 
       return;
     }
 
-    const discovered = await discoverWorkspaceApps(org);
+    const { apps: discoveredApps, directoryUsers } = await discoverWorkspaceApps(org);
 
     let appsFound = 0;
     let newAppsFound = 0;
     const newHighRiskApps: Array<{ appName: string; riskScore: number; userCount: number }> = [];
-    const discoveredClientIds = discovered.map((d) => d.clientId);
+    const discoveredClientIds = discoveredApps.map((d) => d.clientId);
 
-    for (const app of discovered) {
+    for (const app of discoveredApps) {
       const { category, riskLevel, riskScore } = categorizeAndScore(app);
 
       const [existing] = await db
@@ -113,11 +113,17 @@ export async function executeScan(scanId: number, orgId: number): Promise<void> 
 
     await db
       .update(scansTable)
-      .set({ status: "completed", appsFound, newAppsFound, removedAppsFound, completedAt: new Date() })
+      .set({ status: "completed", appsFound, newAppsFound, removedAppsFound, usersFound: directoryUsers.length, completedAt: new Date() })
       .where(eq(scansTable.id, scanId));
 
+    // Persist the directory roster on the org so admins can review it on demand.
+    await db
+      .update(organizationsTable)
+      .set({ directoryUsers })
+      .where(eq(organizationsTable.id, orgId));
+
     logger.info(
-      { scanId, appsFound, newAppsFound, removedAppsFound, newHighRisk: newHighRiskApps.length },
+      { scanId, appsFound, newAppsFound, removedAppsFound, usersFound: directoryUsers.length, newHighRisk: newHighRiskApps.length },
       "Scan completed",
     );
 

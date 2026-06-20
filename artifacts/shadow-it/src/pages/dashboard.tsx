@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { useGetDashboardSummary, useGetNewApps, useTriggerScan, useListScans } from "@workspace/api-client-react";
+import { useGetDashboardSummary, useGetNewApps, useTriggerScan, useListScans, useGetDirectoryUsers } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,8 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import { useQueryClient } from "@tanstack/react-query";
-import { getListScansQueryKey, getGetDashboardSummaryQueryKey, getGetNewAppsQueryKey } from "@workspace/api-client-react";
-import { useEffect } from "react";
+import { getListScansQueryKey, getGetDashboardSummaryQueryKey, getGetNewAppsQueryKey, getGetDirectoryUsersQueryKey } from "@workspace/api-client-react";
+import { useEffect, useState } from "react";
 
 const RISK_COLORS = { high: "#ef4444", medium: "#f59e0b", low: "#10b981" };
 
@@ -18,6 +18,11 @@ export function Dashboard() {
   const queryClient = useQueryClient();
   const { data: summary, isLoading: loadingSummary } = useGetDashboardSummary();
   const { data: newApps, isLoading: loadingApps } = useGetNewApps();
+  // Lazy: the directory roster is only fetched when the admin expands it.
+  const [showUsers, setShowUsers] = useState(false);
+  const { data: directory, isLoading: loadingDirectory } = useGetDirectoryUsers({
+    query: { enabled: showUsers, queryKey: getGetDirectoryUsersQueryKey() },
+  });
   const { data: scans } = useListScans({
     query: { queryKey: getListScansQueryKey() },
   });
@@ -61,7 +66,7 @@ export function Dashboard() {
     summary && summary.totalApps > 0
       ? [
           { name: "Reviewed", value: summary.dismissedApps, fill: "#6366f1" },
-          { name: "Pending", value: summary.totalApps - summary.dismissedApps, fill: "#334155" },
+          { name: "Pending", value: summary.totalApps - summary.dismissedApps, fill: "#94a3b8" },
         ]
       : [];
 
@@ -121,7 +126,11 @@ export function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-foreground">{summary.totalApps}</div>
-              <p className="text-xs text-muted-foreground mt-1">Across {summary.totalUsers} users</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {summary.directoryUsers != null
+                  ? `${summary.directoryUsers} users scanned in your workspace`
+                  : `Across ${summary.totalUsers} users`}
+              </p>
             </CardContent>
           </Card>
           <Card className="border-border shadow-sm border">
@@ -158,6 +167,37 @@ export function Dashboard() {
           </Card>
         </div>
       ) : null}
+
+      {summary && summary.directoryUsers != null && (
+        <div className="text-sm">
+          <button
+            onClick={() => setShowUsers((v) => !v)}
+            className="inline-flex items-center gap-1.5 text-indigo-400 hover:text-indigo-300 font-medium"
+          >
+            <Users className="w-4 h-4" />
+            {showUsers ? "Hide" : "Double-check"} scanned users ({summary.directoryUsers})
+          </button>
+          {showUsers && (
+            <div className="mt-3">
+              <Card className="border-border shadow-sm">
+                <CardContent className="p-4">
+                  {loadingDirectory ? (
+                    <div className="space-y-2">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-4 w-64" />)}</div>
+                  ) : directory && directory.users.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-1.5 max-h-72 overflow-y-auto">
+                      {directory.users.map((email) => (
+                        <span key={email} className="text-sm text-muted-foreground truncate" title={email}>{email}</span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No users returned by the last scan.</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">

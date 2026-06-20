@@ -25,6 +25,7 @@ import type {
   CheckoutSession,
   CurrentUser,
   DashboardSummary,
+  DirectoryUsers,
   EmailSettings,
   EmailSettingsInput,
   ErrorResponse,
@@ -792,6 +793,83 @@ export function useGetNewApps<TData = Awaited<ReturnType<typeof getNewApps>>, TE
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetNewAppsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetDirectoryUsersUrl = () => {
+
+
+
+
+  return `/api/dashboard/directory-users`
+}
+
+/**
+ * @summary List every user seen in the workspace/tenant at the last scan
+ */
+export const getDirectoryUsers = async ( options?: RequestInit): Promise<DirectoryUsers> => {
+
+  return customFetch<DirectoryUsers>(getGetDirectoryUsersUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetDirectoryUsersQueryKey = () => {
+    return [
+    `/api/dashboard/directory-users`
+    ] as const;
+    }
+
+
+export const getGetDirectoryUsersQueryOptions = <TData = Awaited<ReturnType<typeof getDirectoryUsers>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDirectoryUsers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetDirectoryUsersQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDirectoryUsers>>> = ({ signal }) => getDirectoryUsers({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDirectoryUsers>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetDirectoryUsersQueryResult = NonNullable<Awaited<ReturnType<typeof getDirectoryUsers>>>
+export type GetDirectoryUsersQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List every user seen in the workspace/tenant at the last scan
+ */
+
+export function useGetDirectoryUsers<TData = Awaited<ReturnType<typeof getDirectoryUsers>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDirectoryUsers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetDirectoryUsersQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

@@ -1,5 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { db, oauthAppsTable, scansTable } from "@workspace/db";
+import { db, oauthAppsTable, scansTable, organizationsTable } from "@workspace/db";
 import { eq, and, sql, desc } from "drizzle-orm";
 
 const router: IRouter = Router();
@@ -55,7 +55,18 @@ router.get("/dashboard/summary", async (req, res): Promise<void> => {
     dismissedApps,
     lastScanAt: lastScan?.completedAt?.toISOString() ?? null,
     totalUsers: allUsers.size,
+    // Total users in the workspace/tenant at the last scan (coverage proof).
+    directoryUsers: lastScan?.usersFound ?? null,
   });
+});
+
+// On-demand roster of every user seen in the directory at the last scan. Kept
+// out of the summary so the default dashboard stays light.
+router.get("/dashboard/directory-users", async (req, res): Promise<void> => {
+  if (!requireAuth(req, res)) return;
+  const orgId = req.session.organizationId!;
+  const [org] = await db.select().from(organizationsTable).where(eq(organizationsTable.id, orgId));
+  res.json({ users: org?.directoryUsers ?? [] });
 });
 
 router.get("/dashboard/new-apps", async (req, res): Promise<void> => {

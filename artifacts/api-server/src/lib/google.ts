@@ -73,16 +73,23 @@ export interface DiscoveredApp {
   iconUrl?: string | null;
 }
 
+/** Apps discovered plus every user seen in the directory (emails/UPNs). */
+export interface DiscoveryResult {
+  apps: DiscoveredApp[];
+  directoryUsers: string[];
+}
+
 export async function scanWorkspaceApps(
   accessToken: string,
   refreshToken: string,
-): Promise<DiscoveredApp[]> {
+): Promise<DiscoveryResult> {
   const client = createOAuth2Client();
   client.setCredentials({ access_token: accessToken, refresh_token: refreshToken });
 
   const adminClient = google.admin({ version: "directory_v1", auth: client });
 
   const appMap = new Map<string, DiscoveredApp>();
+  const directoryUsers: string[] = [];
 
   let pageToken: string | undefined;
 
@@ -95,6 +102,7 @@ export async function scanWorkspaceApps(
     });
 
     const users = usersRes.data.users ?? [];
+    for (const u of users) if (u.primaryEmail) directoryUsers.push(u.primaryEmail);
     logger.info({ count: users.length }, "Scanning users for OAuth tokens");
 
     await Promise.allSettled(
@@ -130,7 +138,7 @@ export async function scanWorkspaceApps(
     pageToken = usersRes.data.nextPageToken ?? undefined;
   } while (pageToken);
 
-  return Array.from(appMap.values());
+  return { apps: Array.from(appMap.values()), directoryUsers };
 }
 
 export function categorizeAndScore(app: DiscoveredApp) {

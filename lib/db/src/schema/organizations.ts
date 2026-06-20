@@ -26,6 +26,9 @@ export const organizationsTable = pgTable(
     smtpPass: text("smtp_pass"), // encrypted at rest
     emailFrom: text("email_from"),
     alertEmails: text("alert_emails"), // comma-separated; falls back to org users
+    // All users enumerated in the workspace/tenant at the last scan — lets an
+    // admin double-check coverage on demand. Count is its length.
+    directoryUsers: text("directory_users").array(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
   },

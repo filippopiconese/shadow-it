@@ -6,7 +6,25 @@ Legenda: ✅ fatto · 🔄 in corso · ⬜ da fare
 
 ---
 
+## Dashboard: copertura utenti directory + fix contrasto ✅ (2026-06-20)
+
+- ✅ **Conteggio utenti della directory** rilevati allo scan, mostrato in dashboard
+  ("N users scanned in your workspace"): se l'admin vede 0 rischi, ha la prova che lo
+  scan ha raggiunto **tutti** gli utenti (non è parziale). Sia Google (enumera
+  `users.list`) che Microsoft (enumera `/v1.0/users`). Persistito in `scans.users_found`.
+- ✅ **Elenco email utenti on-demand** (doppio controllo facoltativo, senza appesantire
+  la UI di default): la lista è salvata in `organizations.directory_users` allo scan ed
+  esposta da `GET /api/dashboard/directory-users` (nuovo), caricata **lazy** solo quando
+  l'admin clicca "Double-check scanned users". Hook generato `useGetDirectoryUsers`.
+- ✅ **Fix contrasto "Review Progress"**: la barra "Pending" usava `#334155` (quasi uguale
+  allo sfondo) → ora `#94a3b8`, leggibile.
+
 ## Supporto Microsoft 365 (secondo provider, oltre a Google) ✅ (2026-06-20)
+
+- ✅ **Fix `consent_failed`**: `verifyTenantAccess` ora tollera il lag di propagazione
+  post-admin-consent (retry sul token app-only; il probe Graph è best-effort) + logging
+  del codice `AADSTS`. UI: bottoni "Connect Google"/"Connect Microsoft 365" entrambi in
+  blu acceso (hero + header). Guida provider in `docs/provider-setup.md`.
 
 - **Obiettivo**: scansionare lo shadow IT anche su **Microsoft 365**, stessa UX di Google
   (un bottone, nessuna registrazione lato cliente). Vendor = una sola app **multi-tenant**

@@ -159,7 +159,8 @@ export const GetDashboardSummaryResponse = zod.object({
   "newAppsThisWeek": zod.number(),
   "dismissedApps": zod.number(),
   "lastScanAt": zod.string().nullish(),
-  "totalUsers": zod.number()
+  "totalUsers": zod.number(),
+  "directoryUsers": zod.number().nullish()
 })
 
 
@@ -182,6 +183,14 @@ export const GetNewAppsResponseItem = zod.object({
   "status": zod.enum(['active', 'removed'])
 })
 export const GetNewAppsResponse = zod.array(GetNewAppsResponseItem)
+
+
+/**
+ * @summary List every user seen in the workspace/tenant at the last scan
+ */
+export const GetDirectoryUsersResponse = zod.object({
+  "users": zod.array(zod.string())
+})
 
 
 /**

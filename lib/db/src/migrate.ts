@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS organizations (
   smtp_pass text,
   email_from text,
   alert_emails text,
+  directory_users text[],
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
@@ -64,6 +65,7 @@ CREATE TABLE IF NOT EXISTS scans (
   apps_found integer,
   new_apps_found integer,
   removed_apps_found integer,
+  users_found integer,
   error_message text,
   started_at timestamptz NOT NULL DEFAULT now(),
   completed_at timestamptz
@@ -86,6 +88,7 @@ CREATE TABLE IF NOT EXISTS subscriptions (
 -- Defensive: add columns introduced after the initial schema (no-op if present).
 ALTER TABLE oauth_apps ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'active';
 ALTER TABLE scans ADD COLUMN IF NOT EXISTS removed_apps_found integer;
+ALTER TABLE scans ADD COLUMN IF NOT EXISTS users_found integer;
 ALTER TABLE organizations ADD COLUMN IF NOT EXISTS smtp_host text;
 ALTER TABLE organizations ADD COLUMN IF NOT EXISTS smtp_port integer;
 ALTER TABLE organizations ADD COLUMN IF NOT EXISTS smtp_secure boolean NOT NULL DEFAULT false;
@@ -93,6 +96,7 @@ ALTER TABLE organizations ADD COLUMN IF NOT EXISTS smtp_user text;
 ALTER TABLE organizations ADD COLUMN IF NOT EXISTS smtp_pass text;
 ALTER TABLE organizations ADD COLUMN IF NOT EXISTS email_from text;
 ALTER TABLE organizations ADD COLUMN IF NOT EXISTS alert_emails text;
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS directory_users text[];
 
 -- Multi-provider (Google + Microsoft 365) migration. Idempotent: safe on every boot.
 ALTER TABLE organizations ADD COLUMN IF NOT EXISTS provider text NOT NULL DEFAULT 'google';

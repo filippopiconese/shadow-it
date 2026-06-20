@@ -1,6 +1,6 @@
 import { db, organizationsTable, type Organization } from "@workspace/db";
 import { eq } from "drizzle-orm";
-import { scanWorkspaceApps as scanGoogleApps, createOAuth2Client, refreshTokensIfNeeded, type DiscoveredApp } from "./google";
+import { scanWorkspaceApps as scanGoogleApps, createOAuth2Client, refreshTokensIfNeeded, type DiscoveredApp, type DiscoveryResult } from "./google";
 import { scanWorkspaceApps as scanMicrosoftApps } from "./microsoft";
 import { DEMO_APPS, DEMO_NEW_APP, DEMO_DOMAIN } from "./demo-data";
 import { encryptSecret, decryptSecret } from "./crypto";
@@ -37,6 +37,13 @@ function mockDiscover(): DiscoveredApp[] {
     iconUrl: DEMO_NEW_APP.iconUrl,
   });
   return apps;
+}
+
+/** Distinct users across the mock apps — a plausible "directory" for the demo. */
+function mockDirectoryUsers(apps: DiscoveredApp[]): string[] {
+  const set = new Set<string>();
+  for (const a of apps) for (const u of a.authorizedUsers) set.add(u);
+  return Array.from(set);
 }
 
 /**
@@ -80,10 +87,13 @@ export function isConnected(org: Organization): boolean {
  * provider-agnostic DiscoveredApp[]. Handles token acquisition internally so
  * callers (route + scheduler) don't need to know about Google vs Microsoft.
  */
-export async function discoverWorkspaceApps(org: Organization): Promise<DiscoveredApp[]> {
+export async function discoverWorkspaceApps(org: Organization): Promise<DiscoveryResult> {
   // The demo org is always mock — even in production with SCAN_PROVIDER=google —
   // so the public demo never makes a real provider call.
-  if (isMockProvider() || org.domain === DEMO_DOMAIN) return mockDiscover();
+  if (isMockProvider() || org.domain === DEMO_DOMAIN) {
+    const apps = mockDiscover();
+    return { apps, directoryUsers: mockDirectoryUsers(apps) };
+  }
 
   if (org.provider === "microsoft") {
     if (!org.tenantId) throw new Error("Microsoft 365 not connected (missing tenant)");

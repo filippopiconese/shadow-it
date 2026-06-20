@@ -16,4 +16,6 @@ export interface DashboardSummary {
   /** @nullable */
   lastScanAt?: string | null;
   totalUsers: number;
+  /** @nullable */
+  directoryUsers?: number | null;
 }

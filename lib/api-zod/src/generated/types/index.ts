@@ -11,6 +11,7 @@ export * from './billingStatus';
 export * from './checkoutSession';
 export * from './currentUser';
 export * from './dashboardSummary';
+export * from './directoryUsers';
 export * from './emailSettings';
 export * from './emailSettingsInput';
 export * from './errorResponse';

@@ -208,6 +208,19 @@ paths:
                 items:
                   $ref: "#/components/schemas/OAuthApp"
 
+  /dashboard/directory-users:
+    get:
+      operationId: getDirectoryUsers
+      tags: [dashboard]
+      summary: List every user seen in the workspace/tenant at the last scan
+      responses:
+        "200":
+          description: Directory user roster
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DirectoryUsers"
+
   /billing/checkout:
     post:
       operationId: createCheckout
@@ -456,6 +469,8 @@ components:
           type: ["string", "null"]
         totalUsers:
           type: integer
+        directoryUsers:
+          type: ["integer", "null"]
       required:
         - totalApps
         - highRiskApps
@@ -464,6 +479,16 @@ components:
         - newAppsThisWeek
         - dismissedApps
         - totalUsers
+
+    DirectoryUsers:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            type: string
+      required:
+        - users
 
     CheckoutSession:
       type: object

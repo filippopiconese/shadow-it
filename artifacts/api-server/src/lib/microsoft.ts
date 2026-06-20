@@ -1,5 +1,5 @@
 import { logger } from "./logger";
-import type { DiscoveredApp } from "./google";
+import type { DiscoveredApp, DiscoveryResult } from "./google";
 
 // Microsoft 365 (Entra ID) provider. Mirrors lib/google.ts but uses two flows:
 //  - Auth-code (delegated) only to identify WHO is connecting (the admin).
@@ -232,13 +232,25 @@ function isMicrosoftFirstParty(sp: ServicePrincipal): boolean {
   return (sp.publisherName ?? "").toLowerCase().startsWith("microsoft");
 }
 
+interface GraphUser {
+  userPrincipalName?: string;
+  mail?: string | null;
+}
+
 /**
  * Discovers third-party OAuth apps consented in a Microsoft 365 tenant via the
- * Graph API, returning the same DiscoveredApp[] shape as the Google scan so the
+ * Graph API, returning the same DiscoveryResult shape as the Google scan so the
  * rest of the pipeline (upsert → risk → alerts) is unchanged.
  */
-export async function scanWorkspaceApps(tenantId: string): Promise<DiscoveredApp[]> {
+export async function scanWorkspaceApps(tenantId: string): Promise<DiscoveryResult> {
   const token = await getAppOnlyToken(tenantId);
+
+  // Enumerate every user in the tenant — proves the scan reached the whole
+  // directory (so "0 risks" means clean, not partial).
+  const allUsers = await graphGetAll<GraphUser>(token, "/v1.0/users?$select=userPrincipalName,mail&$top=999");
+  const directoryUsers = allUsers
+    .map((u) => u.userPrincipalName || u.mail || "")
+    .filter((e): e is string => Boolean(e));
 
   // Delegated permission grants: which app got which scopes for which user.
   const grants = await graphGetAll<OAuth2Grant>(token, "/v1.0/oauth2PermissionGrants?$top=100");
@@ -294,6 +306,6 @@ export async function scanWorkspaceApps(tenantId: string): Promise<DiscoveredApp
     });
   }
 
-  logger.info({ tenantId, apps: apps.length }, "Microsoft scan complete");
-  return apps;
+  logger.info({ tenantId, apps: apps.length, users: directoryUsers.length }, "Microsoft scan complete");
+  return { apps, directoryUsers };
 }
