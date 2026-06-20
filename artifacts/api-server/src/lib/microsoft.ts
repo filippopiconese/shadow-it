@@ -153,18 +153,35 @@ export async function getAppOnlyToken(tenantId: string): Promise<string> {
   return data.access_token;
 }
 
-/** Confirms admin consent landed by minting an app token + one Graph call. */
+/**
+ * Confirms admin consent landed. Minting an app-only token already proves the
+ * tenant consented (our service principal exists there), so we treat a token as
+ * success. The Graph probe is best-effort: permission propagation can lag a few
+ * seconds right after consent, so we retry the token a couple of times and never
+ * hard-fail on the probe alone.
+ */
 export async function verifyTenantAccess(tenantId: string): Promise<boolean> {
-  try {
-    const token = await getAppOnlyToken(tenantId);
-    const res = await fetch(`${GRAPH_BASE}/v1.0/organization?$select=id`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return res.ok;
-  } catch (err) {
-    logger.warn({ err, tenantId }, "Microsoft tenant access verification failed");
-    return false;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const token = await getAppOnlyToken(tenantId);
+      try {
+        const res = await fetch(`${GRAPH_BASE}/v1.0/organization?$select=id`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) {
+          const detail = await res.text().catch(() => "");
+          logger.warn({ tenantId, status: res.status, detail: detail.slice(0, 200) }, "Graph probe non-OK after consent (propagation lag?)");
+        }
+      } catch (probeErr) {
+        logger.warn({ tenantId, err: String(probeErr) }, "Graph probe failed after consent");
+      }
+      return true;
+    } catch (err) {
+      logger.warn({ tenantId, attempt, err: String(err) }, "App-only token not ready after consent");
+      if (attempt < 3) await new Promise((r) => setTimeout(r, 2000));
+    }
   }
+  return false;
 }
 
 interface GraphList<T> {

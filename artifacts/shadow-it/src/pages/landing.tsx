@@ -87,7 +87,10 @@ export function LandingPage() {
               </button>
             )}
             <button onClick={handleConnect} className="inline-flex items-center gap-2 text-sm font-extrabold text-white px-5 py-2.5 rounded-full" style={{ background: "linear-gradient(135deg,#6366f1,#4338ca)", boxShadow: "0 8px 28px rgba(99,102,241,0.4)" }}>
-              Connect Workspace
+              Connect Google
+            </button>
+            <button onClick={handleConnectMicrosoft} className="inline-flex items-center gap-2 text-sm font-extrabold text-white px-5 py-2.5 rounded-full" style={{ background: "linear-gradient(135deg,#6366f1,#4338ca)", boxShadow: "0 8px 28px rgba(99,102,241,0.4)" }}>
+              Connect Microsoft 365
             </button>
           </div>
         </div>
@@ -119,7 +122,7 @@ export function LandingPage() {
             <button onClick={handleConnect} className="inline-flex items-center justify-center gap-2 h-14 px-8 text-lg font-extrabold text-white rounded-full" style={{ background: "linear-gradient(135deg,#6366f1,#4338ca)", boxShadow: "0 10px 34px rgba(99,102,241,0.45)" }}>
               Connect Google Workspace <ArrowRight className="w-5 h-5" />
             </button>
-            <button onClick={handleConnectMicrosoft} className="inline-flex items-center justify-center gap-2 h-14 px-8 text-lg font-extrabold text-white rounded-full" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(148,163,184,0.4)" }}>
+            <button onClick={handleConnectMicrosoft} className="inline-flex items-center justify-center gap-2 h-14 px-8 text-lg font-extrabold text-white rounded-full" style={{ background: "linear-gradient(135deg,#6366f1,#4338ca)", boxShadow: "0 10px 34px rgba(99,102,241,0.45)" }}>
               Connect Microsoft 365 <ArrowRight className="w-5 h-5" />
             </button>
           </div>
