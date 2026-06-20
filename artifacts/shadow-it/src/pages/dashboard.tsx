@@ -44,7 +44,7 @@ export function Dashboard() {
   const handleScan = () => {
     triggerScan.mutate(undefined, {
       onSuccess: () => {
-        toast({ title: "Scan Initiated", description: "Scanning your Google Workspace — this takes a few minutes." });
+        toast({ title: "Scan Initiated", description: "Scanning your workspace — this takes a few minutes." });
         queryClient.invalidateQueries({ queryKey: getListScansQueryKey() });
       },
       onError: (err) => {

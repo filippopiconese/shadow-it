@@ -2,6 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { db, scansTable, organizationsTable, subscriptionsTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { createScan, executeScan } from "../lib/scan-service";
+import { isConnected } from "../lib/scan-providers";
 import { isEntitled } from "../lib/entitlements";
 
 const router: IRouter = Router();
@@ -51,8 +52,9 @@ router.post("/scans/trigger", async (req, res): Promise<void> => {
   }
 
   const [org] = await db.select().from(organizationsTable).where(eq(organizationsTable.id, orgId));
-  if (!org?.accessToken) {
-    res.status(400).json({ error: "Google Workspace not connected" });
+  if (!org || !isConnected(org)) {
+    const what = org?.provider === "microsoft" ? "Microsoft 365" : "Google Workspace";
+    res.status(400).json({ error: `${what} not connected` });
     return;
   }
 

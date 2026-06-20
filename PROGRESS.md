@@ -25,6 +25,9 @@ Legenda: ✅ fatto · 🔄 in corso · ⬜ da fare
   post-admin-consent (retry sul token app-only; il probe Graph è best-effort) + logging
   del codice `AADSTS`. UI: bottoni "Connect Google"/"Connect Microsoft 365" entrambi in
   blu acceso (hero + header). Guida provider in `docs/provider-setup.md`.
+- ✅ **Fix scan 400 per Microsoft**: `POST /scans/trigger` controllava `org.accessToken`
+  (solo Google) → 400 "Google Workspace not connected" per le org Microsoft. Ora usa
+  `isConnected(org)` (provider-aware). Toast di scan reso provider-neutral.
 
 - **Obiettivo**: scansionare lo shadow IT anche su **Microsoft 365**, stessa UX di Google
   (un bottone, nessuna registrazione lato cliente). Vendor = una sola app **multi-tenant**
