@@ -37,7 +37,7 @@ router.post("/dev/seed-tenant", async (_req, res): Promise<void> => {
     .returning();
   const [user] = await db
     .insert(usersTable)
-    .values({ organizationId: org!.id, googleId: `user-${tag}`, email: `admin@${domain}`, name: `Admin ${tag}` })
+    .values({ organizationId: org!.id, externalId: `user-${tag}`, email: `admin@${domain}`, name: `Admin ${tag}` })
     .returning();
   await db.insert(subscriptionsTable).values({ organizationId: org!.id, status: "active" });
   const appName = `Private App ${tag}`;

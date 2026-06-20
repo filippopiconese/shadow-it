@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import healthRouter from "./health";
 import authRouter from "./auth";
+import authMicrosoftRouter from "./auth-microsoft";
 import appsRouter from "./apps";
 import scansRouter from "./scans";
 import dashboardRouter from "./dashboard";
@@ -13,6 +14,7 @@ const router: IRouter = Router();
 
 router.use(healthRouter);
 router.use(authRouter);
+router.use(authMicrosoftRouter);
 router.use(appsRouter);
 router.use(scansRouter);
 router.use(dashboardRouter);

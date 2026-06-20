@@ -17,6 +17,26 @@ const HIGH_RISK_SCOPES = [
   "https://www.googleapis.com/auth/documents",
   "https://www.googleapis.com/auth/forms",
   "https://www.googleapis.com/auth/keep",
+  // Microsoft Graph permissions (delegated + application share these names).
+  // Write/send access to mail, full file/site access, or directory control.
+  "Mail.ReadWrite",
+  "Mail.Send",
+  "Mail.Read.All",
+  "Mail.ReadWrite.All",
+  "Files.ReadWrite",
+  "Files.ReadWrite.All",
+  "Files.Read.All",
+  "Sites.ReadWrite.All",
+  "Sites.Manage.All",
+  "Sites.FullControl.All",
+  "User.ReadWrite.All",
+  "Group.ReadWrite.All",
+  "Directory.ReadWrite.All",
+  "Directory.AccessAsUser.All",
+  "Application.ReadWrite.All",
+  "AppRoleAssignment.ReadWrite.All",
+  "RoleManagement.ReadWrite.Directory",
+  "full_access_as_app",
 ];
 
 const MEDIUM_RISK_SCOPES = [
@@ -36,6 +56,20 @@ const MEDIUM_RISK_SCOPES = [
   "https://www.googleapis.com/auth/tasks",
   "https://www.googleapis.com/auth/chat",
   "https://www.googleapis.com/auth/photoslibrary",
+  // Microsoft Graph: read access to mail, files, calendar, contacts, directory.
+  "Mail.Read",
+  "Mail.ReadBasic",
+  "Files.Read",
+  "Calendars.Read",
+  "Calendars.ReadWrite",
+  "Contacts.Read",
+  "Contacts.ReadWrite",
+  "User.Read.All",
+  "Directory.Read.All",
+  "Sites.Read.All",
+  "Chat.Read",
+  "ChannelMessage.Read.All",
+  "People.Read.All",
 ];
 
 const SCOPE_DESCRIPTIONS: Record<string, string> = {
@@ -58,6 +92,21 @@ const SCOPE_DESCRIPTIONS: Record<string, string> = {
   "openid": "Verify your identity",
   "email": "Read your email address",
   "profile": "Read your basic profile info",
+  // Microsoft Graph permissions.
+  "Mail.ReadWrite": "Read and write access to mailboxes",
+  "Mail.Send": "Send mail as users",
+  "Mail.Read": "Read user mail",
+  "Mail.Read.All": "Read mail in all mailboxes",
+  "Files.ReadWrite.All": "Full access to all files",
+  "Files.Read.All": "Read all files",
+  "Sites.ReadWrite.All": "Read and write all SharePoint sites",
+  "User.Read.All": "Read all users' full profiles",
+  "User.ReadWrite.All": "Read and write all users' profiles",
+  "Directory.Read.All": "Read directory data",
+  "Directory.ReadWrite.All": "Read and write directory data",
+  "Application.ReadWrite.All": "Manage all app registrations",
+  "full_access_as_app": "Full app-only access to all mailboxes",
+  "User.Read": "Sign in and read the user's profile",
 };
 
 const AI_KEYWORDS = ["gpt", "openai", "claude", "anthropic", "gemini", "copilot", "midjourney", "jasper", "grammarly", "notion ai", "perplexity", "cohere"];

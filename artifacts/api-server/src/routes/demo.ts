@@ -37,11 +37,11 @@ router.post("/demo/login", async (req, res): Promise<void> => {
       await db.update(organizationsTable).set({ accessToken: "mock-token" }).where(eq(organizationsTable.id, org.id));
     }
 
-    let [user] = await db.select().from(usersTable).where(eq(usersTable.googleId, "demo-admin"));
+    let [user] = await db.select().from(usersTable).where(eq(usersTable.externalId, "demo-admin"));
     if (!user) {
       const inserted = await db
         .insert(usersTable)
-        .values({ organizationId: org.id, googleId: "demo-admin", email: "admin@demo-acme.com", name: "Demo Admin", picture: null })
+        .values({ organizationId: org.id, externalId: "demo-admin", email: "admin@demo-acme.com", name: "Demo Admin", picture: null })
         .returning();
       user = inserted[0]!;
     }

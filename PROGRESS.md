@@ -6,6 +6,28 @@ Legenda: ✅ fatto · 🔄 in corso · ⬜ da fare
 
 ---
 
+## Supporto Microsoft 365 (secondo provider, oltre a Google) ✅ (2026-06-20)
+
+- **Obiettivo**: scansionare lo shadow IT anche su **Microsoft 365**, stessa UX di Google
+  (un bottone, nessuna registrazione lato cliente). Vendor = una sola app **multi-tenant**
+  in Azure; l'admin M365 dà il **consenso amministrativo** una volta.
+- ✅ **Decisioni**: *un provider per org* (colonna `provider`, unique `(domain, provider)`);
+  scan auth = **app-only + admin consent** (salviamo solo `tenant_id`, le scansioni usano
+  client-credentials col nostro secret — niente refresh token Microsoft da gestire).
+- ✅ **Schema** (`organizations`: `provider`, `tenant_id`; `users`: `provider`,
+  `google_id`→`external_id`; unique compositi). Migrazione **idempotente** in
+  `lib/db/src/migrate.ts` (ADD COLUMN IF NOT EXISTS + rename guardato + drop unique vecchi).
+- ✅ **Auth** `routes/auth-microsoft.ts` + `lib/microsoft.ts`: login a due hop (auth-code per
+  identificare l'admin → admin-consent per i permessi tenant-wide), `fetch` nativo (no MSAL).
+- ✅ **Scan** `lib/microsoft.ts: scanWorkspaceApps(tenantId)` via Graph
+  (`oauth2PermissionGrants` + `servicePrincipals` + `users`), filtro app first-party
+  Microsoft → stesso `DiscoveredApp[]`. Pipeline scan/scheduler resa **provider-aware**
+  (`discoverWorkspaceApps(org)`, `isConnected(org)`). Risk scoring esteso ai permessi Graph.
+- ✅ **Frontend**: secondo bottone "Connect Microsoft 365" (hero + banner demo), copy
+  generalizzata. Docs/env aggiornati (`.env.example`, `CLAUDE.md`).
+- ⬜ **Operativo (utente)**: registrare l'app Azure (Fase 0), impostare `MICROSOFT_CLIENT_ID`
+  / `MICROSOFT_CLIENT_SECRET` su Railway, testare con un dev tenant M365.
+
 ## Email via API Resend (SMTP bloccato su Railway) ✅ (2026-06-10)
 
 - **Problema**: Railway **blocca le porte SMTP in uscita** (25/465/587), permette solo

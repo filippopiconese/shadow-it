@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, organizationsTable, usersTable, subscriptionsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { createOAuth2Client, getAuthUrl, checkIsWorkspaceAdmin } from "../lib/google";
 import { isEntitled } from "../lib/entitlements";
 import { encryptSecret } from "../lib/crypto";
@@ -52,7 +52,10 @@ router.get("/auth/google/callback", async (req, res): Promise<void> => {
       return;
     }
 
-    let [org] = await db.select().from(organizationsTable).where(eq(organizationsTable.domain, domain));
+    let [org] = await db
+      .select()
+      .from(organizationsTable)
+      .where(and(eq(organizationsTable.domain, domain), eq(organizationsTable.provider, "google")));
 
     if (!org) {
       const trialEnd = new Date();
@@ -61,6 +64,7 @@ router.get("/auth/google/callback", async (req, res): Promise<void> => {
       const inserted = await db
         .insert(organizationsTable)
         .values({
+          provider: "google",
           domain,
           name: domain,
           accessToken: encryptSecret(tokens.access_token ?? null),
@@ -86,12 +90,15 @@ router.get("/auth/google/callback", async (req, res): Promise<void> => {
         .where(eq(organizationsTable.id, org.id));
     }
 
-    let [user] = await db.select().from(usersTable).where(eq(usersTable.googleId, googleId));
+    let [user] = await db
+      .select()
+      .from(usersTable)
+      .where(and(eq(usersTable.provider, "google"), eq(usersTable.externalId, googleId)));
 
     if (!user) {
       const inserted = await db
         .insert(usersTable)
-        .values({ organizationId: org.id, googleId, email, name, picture })
+        .values({ organizationId: org.id, provider: "google", externalId: googleId, email, name, picture })
         .returning();
       user = inserted[0]!;
     } else {

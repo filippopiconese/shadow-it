@@ -1,6 +1,7 @@
 import { db, organizationsTable, subscriptionsTable } from "@workspace/db";
-import { eq, isNotNull } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { createScan, executeScan } from "./scan-service";
+import { isConnected } from "./scan-providers";
 import { logger } from "./logger";
 
 let running = false;
@@ -19,7 +20,10 @@ export async function runDueScans(): Promise<{ scanned: number; skipped: number 
   let skipped = 0;
 
   try {
-    const orgs = await db.select().from(organizationsTable).where(isNotNull(organizationsTable.accessToken));
+    // Provider-aware: a Google org is connected when it has a token, a Microsoft
+    // org when it has a tenant id. Filtered in-app (small org count).
+    const allOrgs = await db.select().from(organizationsTable);
+    const orgs = allOrgs.filter(isConnected);
 
     for (const org of orgs) {
       const [sub] = await db.select().from(subscriptionsTable).where(eq(subscriptionsTable.organizationId, org.id));

@@ -7,6 +7,8 @@ declare module "express-session" {
     userId: number;
     organizationId: number;
     isDemo?: boolean;
+    // CSRF state for the Microsoft OAuth / admin-consent round trip.
+    msOauthState?: string;
   }
 }
 

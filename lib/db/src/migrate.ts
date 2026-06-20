@@ -10,11 +10,13 @@ import type { Pool } from "pg";
 const DDL = /* sql */ `
 CREATE TABLE IF NOT EXISTS organizations (
   id serial PRIMARY KEY,
-  domain text NOT NULL UNIQUE,
+  provider text NOT NULL DEFAULT 'google',
+  domain text NOT NULL,
   name text,
   access_token text,
   refresh_token text,
   token_expiry timestamptz,
+  tenant_id text,
   smtp_host text,
   smtp_port integer,
   smtp_secure boolean NOT NULL DEFAULT false,
@@ -29,7 +31,8 @@ CREATE TABLE IF NOT EXISTS organizations (
 CREATE TABLE IF NOT EXISTS users (
   id serial PRIMARY KEY,
   organization_id integer NOT NULL REFERENCES organizations(id),
-  google_id text NOT NULL UNIQUE,
+  provider text NOT NULL DEFAULT 'google',
+  external_id text NOT NULL,
   email text NOT NULL,
   name text NOT NULL,
   picture text,
@@ -90,6 +93,33 @@ ALTER TABLE organizations ADD COLUMN IF NOT EXISTS smtp_user text;
 ALTER TABLE organizations ADD COLUMN IF NOT EXISTS smtp_pass text;
 ALTER TABLE organizations ADD COLUMN IF NOT EXISTS email_from text;
 ALTER TABLE organizations ADD COLUMN IF NOT EXISTS alert_emails text;
+
+-- Multi-provider (Google + Microsoft 365) migration. Idempotent: safe on every boot.
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS provider text NOT NULL DEFAULT 'google';
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS tenant_id text;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS provider text NOT NULL DEFAULT 'google';
+
+-- Rename users.google_id -> external_id (provider-agnostic subject id) once.
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'google_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'external_id') THEN
+    ALTER TABLE users RENAME COLUMN google_id TO external_id;
+  END IF;
+END $$;
+
+-- Replace single-column uniques with (domain, provider) and (provider, external_id).
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'organizations_domain_key') THEN
+    ALTER TABLE organizations DROP CONSTRAINT organizations_domain_key;
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'users_google_id_key') THEN
+    ALTER TABLE users DROP CONSTRAINT users_google_id_key;
+  END IF;
+END $$;
+CREATE UNIQUE INDEX IF NOT EXISTS org_domain_provider_uq ON organizations (domain, provider);
+CREATE UNIQUE INDEX IF NOT EXISTS users_provider_external_id_uq ON users (provider, external_id);
 `;
 
 export async function runMigrations(pool: Pool): Promise<void> {

@@ -25,7 +25,7 @@ export function Connect() {
         </div>
 
         <h2 className="text-2xl font-bold text-white mb-2">Connecting Workspace</h2>
-        <p className="mb-8" style={{ color: "#94a3b8" }}>Authenticating with Google and establishing a secure connection…</p>
+        <p className="mb-8" style={{ color: "#94a3b8" }}>Authenticating with your workspace and establishing a secure connection…</p>
 
         <div className="flex flex-col items-center gap-3 text-sm font-medium" style={{ color: "#cbd5e1" }}>
           <Loader2 className="w-6 h-6 animate-spin" style={{ color: "#818cf8" }} />

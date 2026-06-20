@@ -5,10 +5,10 @@ Guida per Claude Code (e per chi sviluppa) su questo repository.
 ## Cos'è
 
 **ShadowGuard** — SaaS B2B per PMI che scansiona le **app OAuth di terze parti**
-collegate a un **Google Workspace** (shadow IT) e le classifica per rischio. Un
-super-admin del Workspace fa "Connect", concede accesso **read-only** via Google
-OAuth/Admin SDK, e vede l'inventario delle app con punteggio di rischio, utenti
-autorizzati, scope, storico scansioni e alert sulle nuove app ad alto rischio.
+collegate a un **Google Workspace** o a un **Microsoft 365** (shadow IT) e le classifica
+per rischio. Un admin fa "Connect", concede accesso **read-only** (Google OAuth/Admin SDK
+oppure Microsoft Entra/Graph), e vede l'inventario delle app con punteggio di rischio,
+utenti autorizzati, scope, storico scansioni e alert sulle nuove app ad alto rischio.
 
 Fa parte della famiglia **Micro SaaS** (hub: `../micro-saas`, sito padre
 `micro-saas.it`). A regime sarà su **shadowit.micro-saas.it**. Lancio **gratuito**
@@ -19,7 +19,7 @@ Fa parte della famiglia **Micro SaaS** (hub: `../micro-saas`, sito padre
 - Monorepo **pnpm workspaces**, **Node.js 24**, **TypeScript 5.9**.
 - API: **Express 5** + Helmet + express-rate-limit, bundle **esbuild** (ESM).
 - DB: **PostgreSQL** + **Drizzle ORM** (drizzle-kit per lo schema).
-- Auth: **Google OAuth2 + Admin SDK** (`googleapis`).
+- Auth: **Google OAuth2 + Admin SDK** (`googleapis`) e **Microsoft Entra ID + Graph** (fetch nativo).
 - Frontend: **React + Vite + TanStack Query + wouter + shadcn/ui + recharts**, Tailwind v4.
 - Contratti: **OpenAPI → codegen Orval** (hook React Query) + **Zod** (validazione server).
 - Email: **Resend** (API HTTPS — Railway blocca SMTP in uscita).
@@ -53,8 +53,8 @@ pnpm --filter @workspace/shadow-it build && pnpm dev:api   # tutto su http://loc
 
 ```
 artifacts/
-  api-server/   Express. routes/ (auth, apps, scans, dashboard, billing, settings, demo, dev)
-                lib/ (google, scan-service, scan-providers, scheduler, risk, email,
+  api-server/   Express. routes/ (auth, auth-microsoft, apps, scans, dashboard, billing, settings, demo, dev)
+                lib/ (google, microsoft, scan-service, scan-providers, scheduler, risk, email,
                       crypto, entitlements, session, demo-data, logger), env.ts, build.mjs
   shadow-it/    Frontend React/Vite. src/pages, src/components, public/ (logo, favicon)
 lib/
@@ -71,9 +71,19 @@ Dockerfile, railway.json, docker-compose.yml, .env.example
 - **Contract-first**: modifica `lib/api-spec/openapi.yaml`, poi `pnpm --filter
   @workspace/api-spec run codegen`. **Mai** editare i file in `*/generated/`.
 - **Scansione**: la logica è in `lib/scan-service.ts` (`createScan` + `executeScan`),
-  condivisa da `routes/scans.ts` (manuale) e `lib/scheduler.ts` (automatica).
-  Il provider è in `lib/scan-providers.ts`: `SCAN_PROVIDER=google` (Admin SDK reale)
-  o `mock` (dati sintetici). **L'org demo usa SEMPRE il mock**, anche in prod.
+  condivisa da `routes/scans.ts` (manuale) e `lib/scheduler.ts` (automatica). Il routing
+  per provider è in `lib/scan-providers.ts` (`discoverWorkspaceApps(org)` → `DiscoveredApp[]`):
+  mock/demo → dati sintetici; `org.provider==="microsoft"` → Graph (`lib/microsoft.ts`);
+  altrimenti Google (`lib/google.ts`, acquisizione/refresh token incluso qui).
+  `SCAN_PROVIDER=mock` forza i dati sintetici. **L'org demo usa SEMPRE il mock**, anche in prod.
+- **Multi-provider** (`provider` su `organizations`/`users`, unique compositi
+  `(domain, provider)` e `(provider, external_id)`):
+  - **Google** = OAuth delegated: salviamo `access/refresh token` per org e li rinnoviamo.
+  - **Microsoft 365** = **app-only + admin consent**: salviamo solo `tenant_id`; le scansioni
+    usano client-credentials col NOSTRO secret (`lib/microsoft.ts: getAppOnlyToken`), nessun
+    token per-org. Login a due hop in `routes/auth-microsoft.ts`: auth-code (identifica
+    l'admin) → admin consent (permessi tenant-wide). `isConnected(org)` = token (google) o
+    tenant (microsoft).
 - **Scheduler**: `lib/scheduler.ts`, intervallo `SCAN_INTERVAL_HOURS` (default 24h),
   disattivabile con `ENABLE_SCHEDULER=false`. Scansiona ogni org connessa+entitled.
 - **Entitlement / pricing**: `lib/entitlements.ts`. `LAUNCH_FREE=true` (default) →
@@ -108,7 +118,9 @@ Dockerfile, railway.json, docker-compose.yml, .env.example
 | `APP_URL` | URL pubblico (redirect OAuth/Stripe). |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | OAuth client del vendor (uno solo). |
 | `GOOGLE_REDIRECT_URI` | deve combaciare con la Console: `<APP_URL>/api/auth/google/callback`. |
-| `SCAN_PROVIDER` | `google` (reale) o `mock` (dev senza Google). |
+| `MICROSOFT_CLIENT_ID` / `MICROSOFT_CLIENT_SECRET` | app multi-tenant Entra del vendor (una sola). |
+| `MICROSOFT_REDIRECT_URI` | callback auth-code. Default `<APP_URL>/api/auth/microsoft/callback`; in Azure registra anche `.../api/auth/microsoft/consent`. |
+| `SCAN_PROVIDER` | `mock` forza dati sintetici; altrimenti il provider è quello dell'org (google/microsoft). |
 | `LAUNCH_FREE` | `true` = tutto gratis, no Stripe. |
 | `DEMO_ENABLED` | `true` = demo pubblica attiva. |
 | `SCAN_INTERVAL_HOURS` / `ENABLE_SCHEDULER` | scheduler scansioni. |
@@ -141,5 +153,16 @@ Dockerfile, railway.json, docker-compose.yml, .env.example
   Marketplace serve la verifica + security assessment (CASA). **Per i pilot** basta
   che l'admin cliente marchi il client-id come **"Trusted"** nella propria Admin console
   (Security → API controls) → l'app funziona anche non verificata.
+
+## Microsoft 365 / go-to-market
+
+- Il **vendor** registra UNA sola app **multi-tenant** in Azure (Entra ID → App registrations).
+  Redirect URI: `<APP_URL>/api/auth/microsoft/callback` **e** `.../api/auth/microsoft/consent`.
+  Permessi **Application**: `User.Read.All`, `Application.Read.All`, `Directory.Read.All`
+  (+ delegated default `openid/profile/email/User.Read` per il login admin). Non premere
+  "Grant admin consent" lato vendor: lo concede **ogni cliente** a runtime sul proprio tenant.
+- Per i **pilot** non serve verifica tipo CASA. Per una listing sul commercial marketplace
+  servirà publisher verification (non blocca i pilot).
+- Test: usa un **Microsoft 365 Developer tenant** (E5 gratuito) o un tenant reale.
 
 Vedi `PROGRESS.md` per lo storico degli sprint e lo stato corrente.

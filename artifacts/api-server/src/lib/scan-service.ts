@@ -1,41 +1,10 @@
-import { db, scansTable, oauthAppsTable, organizationsTable, type Organization, type Scan } from "@workspace/db";
+import { db, scansTable, oauthAppsTable, organizationsTable, type Scan } from "@workspace/db";
 import { eq, and, notInArray } from "drizzle-orm";
-import { categorizeAndScore, createOAuth2Client, refreshTokensIfNeeded } from "./google";
-import { discoverWorkspaceApps, isMockProvider } from "./scan-providers";
+import { categorizeAndScore } from "./google";
+import { discoverWorkspaceApps, isMockProvider, isConnected } from "./scan-providers";
 import { DEMO_DOMAIN } from "./demo-data";
-import { encryptSecret, decryptSecret } from "./crypto";
 import { sendNewHighRiskAppsAlert } from "./email";
 import { logger } from "./logger";
-
-/**
- * Returns a usable access token for the org, refreshing it (and persisting the
- * new credentials) when it is expired or about to expire.
- */
-async function getValidAccessToken(org: Organization): Promise<string | null> {
-  if (!org.accessToken) return null;
-
-  const client = createOAuth2Client();
-  client.setCredentials({
-    access_token: decryptSecret(org.accessToken) ?? undefined,
-    refresh_token: decryptSecret(org.refreshToken) ?? undefined,
-  });
-
-  const refreshed = await refreshTokensIfNeeded(client, org.tokenExpiry);
-  if (refreshed?.accessToken) {
-    await db
-      .update(organizationsTable)
-      .set({
-        accessToken: encryptSecret(refreshed.accessToken),
-        refreshToken: refreshed.refreshToken ? encryptSecret(refreshed.refreshToken) : org.refreshToken,
-        tokenExpiry: refreshed.expiry,
-      })
-      .where(eq(organizationsTable.id, org.id));
-    logger.info({ orgId: org.id }, "Refreshed Google access token before scan");
-    return refreshed.accessToken;
-  }
-
-  return decryptSecret(org.accessToken);
-}
 
 /** Inserts a new scan row in the `running` state. */
 export async function createScan(organizationId: number): Promise<Scan> {
@@ -64,29 +33,18 @@ export async function executeScan(scanId: number, orgId: number): Promise<void> 
       return;
     }
 
-    // Real Google provider needs a valid token; the mock provider and the demo
-    // org (always mock) don't.
-    let accessToken: string | undefined;
-    if (!isMockProvider() && org.domain !== DEMO_DOMAIN) {
-      if (!org.accessToken) {
-        await db
-          .update(scansTable)
-          .set({ status: "failed", errorMessage: "Google Workspace not connected", completedAt: new Date() })
-          .where(eq(scansTable.id, scanId));
-        return;
-      }
-      const token = await getValidAccessToken(org);
-      if (!token) {
-        await db
-          .update(scansTable)
-          .set({ status: "failed", errorMessage: "No valid Google access token", completedAt: new Date() })
-          .where(eq(scansTable.id, scanId));
-        return;
-      }
-      accessToken = token;
+    // A real scan needs the org's provider credentials; the mock provider and
+    // the demo org (always mock) don't.
+    if (!isMockProvider() && org.domain !== DEMO_DOMAIN && !isConnected(org)) {
+      const what = org.provider === "microsoft" ? "Microsoft 365" : "Google Workspace";
+      await db
+        .update(scansTable)
+        .set({ status: "failed", errorMessage: `${what} not connected`, completedAt: new Date() })
+        .where(eq(scansTable.id, scanId));
+      return;
     }
 
-    const discovered = await discoverWorkspaceApps(org, accessToken);
+    const discovered = await discoverWorkspaceApps(org);
 
     let appsFound = 0;
     let newAppsFound = 0;

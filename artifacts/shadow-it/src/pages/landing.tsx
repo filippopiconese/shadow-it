@@ -7,12 +7,15 @@ const CONTACT_URL = "https://www.micro-saas.it/contatti";
 
 // Friendly messages for the ?error= param the OAuth flow redirects back with.
 const ERROR_MESSAGES: Record<string, string> = {
-  oauth_not_configured: "Google sign-in isn't configured on this server yet. In local dev, use “View live demo”.",
+  oauth_not_configured: "Sign-in isn't configured on this server yet. In local dev, use “View live demo”.",
   not_admin: "You must sign in with a Google Workspace super-admin account to connect a workspace.",
-  oauth_failed: "Google sign-in failed. Please try again.",
+  oauth_failed: "Sign-in failed. Please try again.",
   session: "Could not start your session. Please try again.",
-  invalid_account: "We couldn't read your Google account. Please try again.",
-  missing_code: "Google sign-in was cancelled.",
+  invalid_account: "We couldn't read your account. Please try again.",
+  missing_code: "Sign-in was cancelled.",
+  invalid_state: "Your sign-in session expired. Please try again.",
+  consent_declined: "Admin consent is required to connect Microsoft 365.",
+  consent_failed: "We couldn't confirm Microsoft 365 access. Please ensure you approved admin consent and try again.",
 };
 
 export function LandingPage() {
@@ -30,6 +33,10 @@ export function LandingPage() {
 
   const handleConnect = () => {
     window.location.href = "/api/auth/google";
+  };
+
+  const handleConnectMicrosoft = () => {
+    window.location.href = "/api/auth/microsoft";
   };
 
   const [demoError, setDemoError] = useState<string | null>(null);
@@ -98,18 +105,22 @@ export function LandingPage() {
 
         {/* Hero */}
         <section className="sg-fade-up py-20 md:py-32 px-6 text-center max-w-4xl mx-auto">
-          <span className="sg-badge">Google Workspace Security</span>
+          <span className="sg-badge">Workspace &amp; Microsoft 365 Security</span>
           <h1 className="mt-6 mb-6 font-extrabold text-white leading-[1.03]" style={{ fontSize: "clamp(38px,7vw,66px)" }}>
             Discover the apps your team is{" "}
             <span className="sg-gradient-text">secretly using.</span>
           </h1>
           <p className="text-lg md:text-xl mx-auto max-w-2xl mb-10" style={{ color: "#cbd5e1", lineHeight: 1.6 }}>
             Shadow IT is the number one vector for data leaks. ShadowGuard scans your Google
-            Workspace to find every unauthorized OAuth app connected by your employees — scored by risk.
+            Workspace or Microsoft 365 to find every unauthorized OAuth app connected by your
+            employees — scored by risk.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button onClick={handleConnect} className="inline-flex items-center justify-center gap-2 h-14 px-8 text-lg font-extrabold text-white rounded-full" style={{ background: "linear-gradient(135deg,#6366f1,#4338ca)", boxShadow: "0 10px 34px rgba(99,102,241,0.45)" }}>
               Connect Google Workspace <ArrowRight className="w-5 h-5" />
+            </button>
+            <button onClick={handleConnectMicrosoft} className="inline-flex items-center justify-center gap-2 h-14 px-8 text-lg font-extrabold text-white rounded-full" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(148,163,184,0.4)" }}>
+              Connect Microsoft 365 <ArrowRight className="w-5 h-5" />
             </button>
           </div>
           <p className="mt-4 text-sm" style={{ color: "#94a3b8" }}>Takes 30 seconds. Read-only access.</p>
@@ -121,7 +132,7 @@ export function LandingPage() {
             <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-14">Clear visibility in three steps</h2>
             <div className="grid md:grid-cols-3 gap-6">
               {[
-                { icon: Lock, title: "1. Connect securely", text: "Sign in with your Google Workspace super-admin account and approve read-only access — takes 30 seconds, no setup, free during launch." },
+                { icon: Lock, title: "1. Connect securely", text: "Sign in as a Google Workspace super-admin or a Microsoft 365 admin and approve read-only access — takes 30 seconds, no setup, free during launch." },
                 { icon: Search, title: "2. We scan for risks", text: "Our engine analyzes every OAuth token granted by your users, categorizing apps by permissions and risk level." },
                 { icon: AlertCircle, title: "3. Mitigate instantly", text: "Review high-risk applications, see exactly who is using them, and act directly from your dashboard." },
               ].map((step) => (

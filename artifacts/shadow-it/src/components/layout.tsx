@@ -110,9 +110,12 @@ export function Layout({ children }: LayoutProps) {
       <div className="flex-1 md:pl-64 flex flex-col min-h-screen">
         {user?.domain === "demo-acme.com" && (
           <div className="bg-indigo-500/15 border-b border-indigo-500/30 px-4 py-2.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm">
-            <span className="text-indigo-200">👀 You're exploring <strong>sample demo data</strong> — connect your Google Workspace to scan your own apps.</span>
+            <span className="text-indigo-200">👀 You're exploring <strong>sample demo data</strong> — connect your workspace to scan your own apps.</span>
             <button onClick={() => { window.location.href = "/api/auth/google"; }} className="font-semibold text-white underline hover:no-underline">
-              Connect Workspace →
+              Google Workspace →
+            </button>
+            <button onClick={() => { window.location.href = "/api/auth/microsoft"; }} className="font-semibold text-white underline hover:no-underline">
+              Microsoft 365 →
             </button>
           </div>
         )}
