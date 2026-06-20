@@ -28,8 +28,14 @@ Legenda: ✅ fatto · 🔄 in corso · ⬜ da fare
   la UI di default): la lista è salvata in `organizations.directory_users` allo scan ed
   esposta da `GET /api/dashboard/directory-users` (nuovo), caricata **lazy** solo quando
   l'admin clicca "Double-check scanned users". Hook generato `useGetDirectoryUsers`.
-- ✅ **Fix contrasto "Review Progress"**: la barra "Pending" usava `#334155` (quasi uguale
-  allo sfondo) → ora `#94a3b8`, leggibile.
+- ✅ **"Review Progress" ridisegnato**: il grafico recharts a due barre (poco leggibile e
+  dall'aria "appesa") è stato sostituito da una **progress bar** semplice con colori chiari
+  su sfondo scuro ("N di M reviewed", legenda Reviewed/Pending). Rimossi gli import recharts
+  inutilizzati (BarChart/Bar/XAxis/YAxis/CartesianGrid).
+- ✅ **Filtro self-app (Microsoft + Google)**: dopo il consenso ShadowGuard stessa compare tra
+  i grant/token → veniva contata come "1 app shadow IT". Ora si esclude l'app con
+  `appId === MICROSOFT_CLIENT_ID` (Graph, oltre alle first-party Microsoft) e con
+  `clientId === GOOGLE_CLIENT_ID` (Admin SDK).
 
 ## Supporto Microsoft 365 (secondo provider, oltre a Google) ✅ (2026-06-20)
 

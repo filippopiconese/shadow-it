@@ -7,7 +7,7 @@ import { ShieldAlert, ShieldCheck, Shield, Users, AppWindow, Activity, ArrowRigh
 import { RiskBadge } from "@/components/risk-badge";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { useQueryClient } from "@tanstack/react-query";
 import { getListScansQueryKey, getGetDashboardSummaryQueryKey, getGetNewAppsQueryKey, getGetDirectoryUsersQueryKey } from "@workspace/api-client-react";
 import { useEffect, useState } from "react";
@@ -62,13 +62,10 @@ export function Dashboard() {
         ].filter((d) => d.value > 0)
       : [];
 
-  const reviewData =
-    summary && summary.totalApps > 0
-      ? [
-          { name: "Reviewed", value: summary.dismissedApps, fill: "#6366f1" },
-          { name: "Pending", value: summary.totalApps - summary.dismissedApps, fill: "#94a3b8" },
-        ]
-      : [];
+  const reviewedCount = summary?.dismissedApps ?? 0;
+  const pendingCount = summary ? summary.totalApps - summary.dismissedApps : 0;
+  const reviewedPercent =
+    summary && summary.totalApps > 0 ? Math.round((reviewedCount / summary.totalApps) * 100) : 0;
 
   const riskPercent =
     summary && summary.totalApps > 0
@@ -345,23 +342,25 @@ export function Dashboard() {
         </div>
       </div>
 
-      {summary && summary.totalApps > 0 && reviewData.length > 0 && (
+      {summary && summary.totalApps > 0 && (
         <Card className="border-border shadow-sm p-6">
-          <h2 className="text-base font-semibold text-foreground mb-4">Review Progress</h2>
-          <div className="h-24">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={reviewData} layout="vertical" barCategoryGap="20%" margin={{ top: 4, bottom: 4, left: 0, right: 24 }}>
-                <XAxis type="number" hide />
-                <YAxis type="category" dataKey="name" width={64} tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
-                <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#1e293b" />
-                <Tooltip formatter={(v) => [`${v} apps`]} contentStyle={{ borderRadius: 8, border: "1px solid #334155", background: "#0e1a38", color: "#e2e8f0", fontSize: 12 }} />
-                <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                  {reviewData.map((entry, index) => (
-                    <Cell key={index} fill={entry.fill} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-semibold text-foreground">Review Progress</h2>
+            <span className="text-sm text-slate-300">{reviewedCount} of {summary.totalApps} reviewed</span>
+          </div>
+          <div className="h-3 w-full rounded-full bg-slate-700 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-indigo-400 transition-all duration-700"
+              style={{ width: `${reviewedPercent}%` }}
+            />
+          </div>
+          <div className="mt-3 flex items-center gap-6 text-sm text-slate-200">
+            <span className="inline-flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-indigo-400" /> Reviewed {reviewedCount}
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-slate-400" /> Pending {pendingCount}
+            </span>
           </div>
         </Card>
       )}

@@ -91,6 +91,10 @@ export async function scanWorkspaceApps(
   const appMap = new Map<string, DiscoveredApp>();
   const directoryUsers: string[] = [];
 
+  // Exclude ShadowGuard's own OAuth client — the admin's grant to us shows up in
+  // the token list, and we don't want to flag ourselves as shadow IT.
+  const ownClientId = process.env.GOOGLE_CLIENT_ID?.trim();
+
   let pageToken: string | undefined;
 
   do {
@@ -114,6 +118,7 @@ export async function scanWorkspaceApps(
 
           for (const token of tokens) {
             const clientId = token.clientId ?? "unknown";
+            if (ownClientId && clientId === ownClientId) continue;
             const appName = token.displayText ?? clientId;
             const scopes = token.scopes ?? [];
 

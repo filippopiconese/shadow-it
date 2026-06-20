@@ -325,10 +325,15 @@ export async function scanWorkspaceApps(tenantId: string): Promise<DiscoveryResu
     }
   }
 
+  // Exclude ShadowGuard itself — after admin consent our own app has a grant in
+  // the tenant, and we don't want to flag ourselves as shadow IT.
+  const ownAppId = process.env.MICROSOFT_CLIENT_ID?.trim();
+
   const apps: DiscoveredApp[] = [];
   for (const [spId, e] of byClient) {
     const sp = spById.get(spId);
     if (!sp || isMicrosoftFirstParty(sp)) continue;
+    if (ownAppId && sp.appId === ownAppId) continue;
 
     const users: string[] = [];
     if (e.allPrincipals) users.push("(all users)");
