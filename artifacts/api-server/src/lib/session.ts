@@ -9,6 +9,8 @@ declare module "express-session" {
     isDemo?: boolean;
     // CSRF state for the Microsoft OAuth / admin-consent round trip.
     msOauthState?: string;
+    // Tenant identified at login, to verify the admin-consent callback matches.
+    msTenantId?: string;
   }
 }
 

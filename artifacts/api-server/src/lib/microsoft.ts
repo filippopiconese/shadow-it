@@ -191,6 +191,8 @@ interface GraphList<T> {
 
 async function graphGet<T>(token: string, url: string): Promise<T> {
   const full = url.startsWith("http") ? url : `${GRAPH_BASE}${url}`;
+  // Defense-in-depth: only ever talk to Graph (paginated @odata.nextLink is absolute).
+  if (!full.startsWith(`${GRAPH_BASE}/`)) throw new Error(`Refusing non-Graph URL: ${full.slice(0, 60)}`);
   const res = await fetch(full, { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) {
     const detail = await res.text().catch(() => "");

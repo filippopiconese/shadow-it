@@ -58,13 +58,16 @@ router.get("/auth/microsoft/callback", async (req, res): Promise<void> => {
       .from(organizationsTable)
       .where(and(eq(organizationsTable.domain, domain), eq(organizationsTable.provider, "microsoft")));
 
+    // The org is created WITHOUT tenantId: it's only set after admin consent is
+    // confirmed (step 3), so an abandoned consent never leaves a half-connected
+    // org that the scheduler would keep trying to scan.
     if (!org) {
       const trialEnd = new Date();
       trialEnd.setDate(trialEnd.getDate() + 14);
 
       const inserted = await db
         .insert(organizationsTable)
-        .values({ provider: "microsoft", domain, name: domain, tenantId: admin.tenantId })
+        .values({ provider: "microsoft", domain, name: domain })
         .returning();
       org = inserted[0]!;
 
@@ -73,11 +76,6 @@ router.get("/auth/microsoft/callback", async (req, res): Promise<void> => {
         status: "trial",
         trialEndsAt: trialEnd,
       });
-    } else {
-      await db
-        .update(organizationsTable)
-        .set({ tenantId: admin.tenantId })
-        .where(eq(organizationsTable.id, org.id));
     }
 
     let [user] = await db
@@ -97,6 +95,8 @@ router.get("/auth/microsoft/callback", async (req, res): Promise<void> => {
 
     req.session.userId = user.id;
     req.session.organizationId = org.id;
+    // Remember the tenant so the consent callback can't be bound to a different one.
+    req.session.msTenantId = admin.tenantId;
     // Fresh state for the admin-consent hop.
     const consentState = crypto.randomBytes(16).toString("hex");
     req.session.msOauthState = consentState;
@@ -115,17 +115,29 @@ router.get("/auth/microsoft/callback", async (req, res): Promise<void> => {
   }
 });
 
+const GUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
 // Step 3 — admin-consent callback: confirm the tenant granted app permissions.
 router.get("/auth/microsoft/consent", async (req, res): Promise<void> => {
   const state = req.query["state"];
   const adminConsent = String(req.query["admin_consent"] ?? "").toLowerCase();
   const tenant = req.query["tenant"];
+  const orgId = req.session.organizationId;
 
+  if (!orgId) {
+    res.redirect("/?error=session");
+    return;
+  }
   if (typeof state !== "string" || state !== req.session.msOauthState) {
     res.redirect("/?error=invalid_state");
     return;
   }
-  if (adminConsent !== "true" || typeof tenant !== "string") {
+  // Tenant must be a GUID and match the one identified at login (no confusion).
+  if (typeof tenant !== "string" || !GUID_RE.test(tenant) || tenant !== req.session.msTenantId) {
+    res.redirect("/?error=invalid_state");
+    return;
+  }
+  if (adminConsent !== "true") {
     res.redirect("/?error=consent_declined");
     return;
   }
@@ -135,6 +147,12 @@ router.get("/auth/microsoft/consent", async (req, res): Promise<void> => {
     res.redirect("/?error=consent_failed");
     return;
   }
+
+  // Consent confirmed: now persist the tenant so scans can run.
+  await db.update(organizationsTable).set({ tenantId: tenant }).where(eq(organizationsTable.id, orgId));
+  // One-time values consumed — clear them.
+  delete req.session.msOauthState;
+  delete req.session.msTenantId;
 
   res.redirect("/connect");
 });
