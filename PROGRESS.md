@@ -6,6 +6,18 @@ Legenda: ✅ fatto · 🔄 in corso · ⬜ da fare
 
 ---
 
+## Ottimizzazioni + hardening sicurezza ✅ (2026-06-20)
+
+- ✅ **Scan Microsoft senza N+1**: i service principal e gli utenti referenziati dai grant
+  vengono risolti in blocco con `POST /directoryObjects/getByIds` (≤1000/chiamata) invece di
+  una GET per app + una per utente → da N+M round-trip a pochi POST. (`lib/microsoft.ts`)
+- ✅ **Dashboard summary in SQL**: `/dashboard/summary` usa aggregati `count(*) filter (...)`
+  e `unnest` per gli utenti distinti, invece di caricare tutte le righe app in memoria.
+- ✅ **Hardening auth Microsoft** (da review): `tenant_id` scritto solo dopo consenso
+  confermato (no org "mezza connessa"); il callback di consenso valida che `tenant` sia un
+  GUID **e** coincida con quello del login (anti tenant-confusion); guard di sessione;
+  pulizia degli one-time `msOauthState`/`msTenantId`; `graphGet` rifiuta URL non-Graph (SSRF).
+
 ## Dashboard: copertura utenti directory + fix contrasto ✅ (2026-06-20)
 
 - ✅ **Conteggio utenti della directory** rilevati allo scan, mostrato in dashboard

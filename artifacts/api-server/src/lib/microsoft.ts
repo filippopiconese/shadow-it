@@ -213,6 +213,44 @@ async function graphGetAll<T>(token: string, url: string): Promise<T[]> {
   return out;
 }
 
+async function graphPost<T>(token: string, path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${GRAPH_BASE}${path}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`Graph ${res.status} on ${path}: ${detail.slice(0, 200)}`);
+  }
+  return (await res.json()) as T;
+}
+
+interface DirectoryObject {
+  id: string;
+  "@odata.type"?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Resolves directory objects by id in bulk via /directoryObjects/getByIds
+ * (up to 1000 ids per call) — collapses the per-app/per-user N+1 GETs into a
+ * couple of POSTs.
+ */
+async function getByIds(token: string, ids: string[], types: string[]): Promise<DirectoryObject[]> {
+  const out: DirectoryObject[] = [];
+  for (let i = 0; i < ids.length; i += 1000) {
+    const chunk = ids.slice(i, i + 1000);
+    if (chunk.length === 0) continue;
+    const data = await graphPost<GraphList<DirectoryObject>>(token, "/v1.0/directoryObjects/getByIds", {
+      ids: chunk,
+      types,
+    });
+    out.push(...(data.value ?? []));
+  }
+  return out;
+}
+
 interface OAuth2Grant {
   clientId?: string; // service principal objectId of the client app
   consentType?: string; // "AllPrincipals" | "Principal"
@@ -271,33 +309,30 @@ export async function scanWorkspaceApps(tenantId: string): Promise<DiscoveryResu
 
   logger.info({ tenantId, clientApps: byClient.size }, "Microsoft scan: aggregating OAuth grants");
 
-  const userCache = new Map<string, string>();
-  const apps: DiscoveredApp[] = [];
+  // Resolve every service principal and user referenced by the grants in bulk
+  // (getByIds, ≤1000/call) instead of one GET each — avoids the N+1 round trips.
+  const principalIds = new Set<string>();
+  for (const e of byClient.values()) for (const pid of e.principalIds) principalIds.add(pid);
 
+  const objects = await getByIds(token, [...byClient.keys(), ...principalIds], ["servicePrincipal", "user"]);
+  const spById = new Map<string, ServicePrincipal>();
+  const userById = new Map<string, string>();
+  for (const o of objects) {
+    if (o["@odata.type"] === "#microsoft.graph.servicePrincipal") {
+      spById.set(o.id, o as ServicePrincipal & { id: string });
+    } else if (o["@odata.type"] === "#microsoft.graph.user") {
+      userById.set(o.id, (o["userPrincipalName"] as string) ?? (o["mail"] as string) ?? o.id);
+    }
+  }
+
+  const apps: DiscoveredApp[] = [];
   for (const [spId, e] of byClient) {
-    const sp = await graphGet<ServicePrincipal>(
-      token,
-      `/v1.0/servicePrincipals/${spId}?$select=appId,displayName,appDisplayName,publisherName,appOwnerOrganizationId,info`,
-    ).catch((err) => {
-      logger.warn({ spId, err }, "Failed to resolve service principal");
-      return null;
-    });
+    const sp = spById.get(spId);
     if (!sp || isMicrosoftFirstParty(sp)) continue;
 
     const users: string[] = [];
     if (e.allPrincipals) users.push("(all users)");
-    for (const pid of e.principalIds) {
-      let upn = userCache.get(pid);
-      if (upn === undefined) {
-        const u = await graphGet<{ userPrincipalName?: string }>(
-          token,
-          `/v1.0/users/${pid}?$select=userPrincipalName`,
-        ).catch(() => null);
-        upn = u?.userPrincipalName ?? pid;
-        userCache.set(pid, upn);
-      }
-      users.push(upn);
-    }
+    for (const pid of e.principalIds) users.push(userById.get(pid) ?? pid);
 
     apps.push({
       clientId: sp.appId ?? spId,
