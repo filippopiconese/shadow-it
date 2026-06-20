@@ -348,9 +348,9 @@ export function Dashboard() {
       {summary && summary.totalApps > 0 && reviewData.length > 0 && (
         <Card className="border-border shadow-sm p-6">
           <h2 className="text-base font-semibold text-foreground mb-4">Review Progress</h2>
-          <div className="h-10">
+          <div className="h-24">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={reviewData} layout="vertical" margin={{ left: 0, right: 24 }}>
+              <BarChart data={reviewData} layout="vertical" barCategoryGap="20%" margin={{ top: 4, bottom: 4, left: 0, right: 24 }}>
                 <XAxis type="number" hide />
                 <YAxis type="category" dataKey="name" width={64} tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
                 <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#1e293b" />
