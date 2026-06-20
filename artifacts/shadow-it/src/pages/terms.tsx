@@ -4,27 +4,28 @@ export function Terms() {
   return (
     <LegalLayout
       title="Terms of Service"
-      subtitle="ShadowGuard — Shadow IT Detector for Google Workspace"
-      lastUpdated="6 June 2026"
+      subtitle="ShadowGuard — Shadow IT Detector for Google Workspace & Microsoft 365"
+      lastUpdated="20 June 2026"
     >
       <h2>1. Agreement</h2>
       <p>
         These Terms of Service ("Terms") govern your access to and use of <strong>ShadowGuard</strong>{" "}
         (the "Service"), provided by <strong>Micro SaaS</strong> (Filippo Piconese, "we", "us"). By
-        connecting your Google Workspace or otherwise using the Service, you agree to these Terms on
-        behalf of your organisation.
+        connecting your Google Workspace or Microsoft 365 tenant, or otherwise using the Service, you
+        agree to these Terms on behalf of your organisation.
       </p>
 
       <h2>2. The Service</h2>
       <p>
-        ShadowGuard connects to your Google Workspace via Google's OAuth and Admin SDK APIs to discover
-        the third-party OAuth applications your users have authorised and to score them by risk. The
-        Service requests <strong>read-only</strong> access and cannot modify your Workspace.
+        ShadowGuard connects to your Google Workspace (via Google's OAuth and Admin SDK APIs) or your
+        Microsoft 365 tenant (via Microsoft Entra ID and the Microsoft Graph API) to discover the
+        third-party OAuth applications your users have authorised and to score them by risk. The
+        Service requests <strong>read-only</strong> access and cannot modify your workspace or tenant.
       </p>
 
       <h2>3. Eligibility &amp; Authorisation</h2>
       <ul>
-        <li>You must be a <strong>super administrator</strong> of the Google Workspace you connect, or duly authorised to act on its behalf.</li>
+        <li>You must be a <strong>super administrator</strong> of the Google Workspace, or a <strong>global administrator</strong> of the Microsoft 365 tenant, that you connect — or duly authorised to act on its behalf.</li>
         <li>You are responsible for ensuring that connecting ShadowGuard complies with your organisation's policies and applicable law.</li>
       </ul>
 
@@ -39,19 +40,23 @@ export function Terms() {
 
       <h2>5. Acceptable Use</h2>
       <ul>
-        <li>Do not use the Service to access workspaces you are not authorised to administer.</li>
+        <li>Do not use the Service to access workspaces or tenants you are not authorised to administer.</li>
         <li>Do not attempt to disrupt, reverse engineer, or circumvent the security of the Service.</li>
-        <li>Do not use the Service in violation of applicable laws or Google's terms.</li>
+        <li>Do not use the Service in violation of applicable laws or of Google's or Microsoft's terms.</li>
       </ul>
 
-      <h2>6. Google API Services</h2>
+      <h2>6. Google &amp; Microsoft API Services</h2>
       <p>
         Your use of Google data through ShadowGuard is also subject to the{" "}
         <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">
           Google API Services User Data Policy
-        </a>, including its Limited Use requirements. Our handling of Google data is described in our{" "}
-        <a href="/privacy">Privacy Policy</a>. You may revoke ShadowGuard's access at any time from
-        your Google Admin console.
+        </a> (including its Limited Use requirements), and your use of Microsoft 365 data is subject to
+        the{" "}
+        <a href="https://learn.microsoft.com/en-us/legal/microsoft-apis/terms-of-use" target="_blank" rel="noopener">
+          Microsoft APIs Terms of Use
+        </a>. Our handling of this data is described in our <a href="/privacy">Privacy Policy</a>. You
+        may revoke ShadowGuard's access at any time from your Google Admin console, or by removing the
+        application's admin consent in Microsoft Entra ID.
       </p>
 
       <h2>7. Data &amp; Privacy</h2>
@@ -80,9 +85,10 @@ export function Terms() {
 
       <h2>10. Termination</h2>
       <p>
-        You may stop using the Service and revoke its access at any time from your Google Admin console.
-        We may suspend or terminate access for breach of these Terms or to comply with law. On
-        termination, we delete your organisation's data and stored tokens as described in the Privacy Policy.
+        You may stop using the Service and revoke its access at any time from your Google Admin console,
+        or by removing the application's admin consent in Microsoft Entra ID. We may suspend or terminate
+        access for breach of these Terms or to comply with law. On termination, we delete your
+        organisation's data and any stored tokens or tenant identifier as described in the Privacy Policy.
       </p>
 
       <h2>11. Governing Law</h2>

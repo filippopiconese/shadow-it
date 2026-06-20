@@ -30,7 +30,7 @@ export function Scans() {
   const handleTriggerScan = () => {
     triggerScan.mutate(undefined, {
       onSuccess: () => {
-        toast({ title: "Scan Started", description: "Scanning your Google Workspace for OAuth apps." });
+        toast({ title: "Scan Started", description: "Scanning your workspace for OAuth apps." });
         queryClient.invalidateQueries({ queryKey: getListScansQueryKey() });
       },
       onError: (err) => {
@@ -89,7 +89,7 @@ export function Scans() {
           </div>
           <div>
             <p className="text-sm font-medium text-indigo-200">Scan in progress</p>
-            <p className="text-xs text-indigo-300/80 mt-0.5">Checking all users in your Google Workspace for OAuth tokens. This may take a few minutes.</p>
+            <p className="text-xs text-indigo-300/80 mt-0.5">Checking all users in your workspace for OAuth grants. This may take a few minutes.</p>
           </div>
         </div>
       )}

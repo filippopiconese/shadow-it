@@ -108,7 +108,7 @@ export function AppDetail() {
 
         <div className="flex items-center gap-3">
           <Button variant="outline" className="border-border hover:bg-muted/50">
-            <ExternalLink className="w-4 h-4 mr-2" /> Google Workspace Admin
+            <ExternalLink className="w-4 h-4 mr-2" /> Admin console
           </Button>
           {!app.isDismissed && (
             <Button onClick={handleDismiss} disabled={dismissApp.isPending}>

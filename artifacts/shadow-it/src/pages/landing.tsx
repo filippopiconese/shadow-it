@@ -8,7 +8,7 @@ const CONTACT_URL = "https://www.micro-saas.it/contatti";
 // Friendly messages for the ?error= param the OAuth flow redirects back with.
 const ERROR_MESSAGES: Record<string, string> = {
   oauth_not_configured: "Sign-in isn't configured on this server yet. In local dev, use “View live demo”.",
-  not_admin: "You must sign in with a Google Workspace super-admin account to connect a workspace.",
+  not_admin: "You must sign in with a Google Workspace super-admin or Microsoft 365 admin account to connect.",
   oauth_failed: "Sign-in failed. Please try again.",
   session: "Could not start your session. Please try again.",
   invalid_account: "We couldn't read your account. Please try again.",
@@ -228,7 +228,7 @@ export function LandingPage() {
             <div className="md:col-span-2">
               <Logo size={44} showSub={false} wordmarkClassName="text-lg text-white" />
               <p className="mt-4 text-sm max-w-xs" style={{ color: "#94a3b8", lineHeight: 1.6 }}>
-                Visibilità sullo shadow IT del tuo Google Workspace. Una micro-app verticale della famiglia Micro&nbsp;SaaS.
+                Visibilità sullo shadow IT del tuo Google Workspace o Microsoft 365. Una micro-app verticale della famiglia Micro&nbsp;SaaS.
               </p>
             </div>
             <div>

@@ -6,6 +6,17 @@ Legenda: ✅ fatto · 🔄 in corso · ⬜ da fare
 
 ---
 
+## Legale + copy multi-provider ✅ (2026-06-20)
+
+- ✅ **Privacy Policy** e **Terms of Service** aggiornate per Microsoft 365: ambienti
+  (Google Workspace *o* Microsoft 365), API (Admin SDK / Microsoft Graph), credenziali
+  (token Google vs **solo tenantId** app-only per Microsoft), revoca (Google Admin /
+  admin consent in Entra), sezione Limited Use estesa a Microsoft APIs Terms, sub-processor
+  Microsoft Corporation + Resend.
+- ✅ **SEO/meta** (`index.html`) e copy UI provider-neutral (toast scan, footer, messaggio
+  not_admin, bottone "Admin console"). Hub `micro-saas` già aggiornato (scheda prodotto +
+  payoff).
+
 ## Ottimizzazioni + hardening sicurezza ✅ (2026-06-20)
 
 - ✅ **Scan Microsoft senza N+1**: i service principal e gli utenti referenziati dai grant
