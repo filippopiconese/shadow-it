@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { useDocumentHead } from "@/hooks/use-document-head";
 import { useGetDashboardSummary, useGetNewApps, useTriggerScan, useListScans, useGetDirectoryUsers } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import { useEffect, useState } from "react";
 const RISK_COLORS = { high: "#ef4444", medium: "#f59e0b", low: "#10b981" };
 
 export function Dashboard() {
+  useDocumentHead({ title: "Dashboard" });
   const queryClient = useQueryClient();
   const { data: summary, isLoading: loadingSummary } = useGetDashboardSummary();
   const { data: newApps, isLoading: loadingApps } = useGetNewApps();

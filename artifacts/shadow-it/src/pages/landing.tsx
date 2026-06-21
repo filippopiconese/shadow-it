@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Lock, Search, AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Logo } from "@/components/logo";
+import { useDocumentHead } from "@/hooks/use-document-head";
 
 const HUB_URL = "https://www.micro-saas.it";
 const CONTACT_URL = "https://www.micro-saas.it/contatti";
@@ -19,6 +20,10 @@ const ERROR_MESSAGES: Record<string, string> = {
 };
 
 export function LandingPage() {
+  useDocumentHead({
+    title: "ShadowGuard — Shadow IT Detector for Google Workspace & Microsoft 365",
+    description: "Discover and risk-score every unauthorized OAuth app connected to your Google Workspace or Microsoft 365. ShadowGuard gives IT admins instant visibility into shadow IT — no agents, 1-click connect, free during launch.",
+  });
   const authError = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("error") : null;
   const errorMessage = authError ? (ERROR_MESSAGES[authError] ?? "Something went wrong during sign-in.") : null;
 
@@ -219,6 +224,25 @@ export function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* FAQ — visible section matching JSON-LD FAQPage schema */}
+        <section id="faq" className="py-20 px-6 max-w-4xl mx-auto" style={{ scrollMarginTop: "72px" }}>
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-14">Frequently asked questions</h2>
+          <dl className="space-y-8">
+            {[
+              { q: "What is shadow IT?", a: "Shadow IT refers to third-party applications that employees connect to your company's Google Workspace or Microsoft 365 without IT approval. These apps receive OAuth permissions (scopes) that can include reading emails, accessing files, or managing contacts — creating data-leak risks that administrators can't see from the standard admin console." },
+              { q: "How does ShadowGuard detect unauthorized apps?", a: "ShadowGuard connects to your Google Workspace (via Admin SDK) or Microsoft 365 tenant (via Microsoft Graph) with read-only permissions. It enumerates every OAuth grant and delegated permission across all users, identifies the third-party applications behind them, and scores each app by risk based on the sensitivity of the scopes it was granted and how many users authorized it." },
+              { q: "Does ShadowGuard read my emails or files?", a: "No. ShadowGuard requests only read-only directory and token-listing scopes. It never accesses the content of emails, Drive/OneDrive files, calendars, or chats. It reads authorization metadata only — which apps are connected and what permissions they have." },
+              { q: "Is ShadowGuard free?", a: "Yes. During the launch period all features are free with no commitment or credit card required. When paid plans launch, early adopters who connected during the free period will keep their access." },
+              { q: "Which platforms does ShadowGuard support?", a: "ShadowGuard supports Google Workspace and Microsoft 365. A Google Workspace super-admin or a Microsoft 365 global administrator can connect their environment in about 30 seconds." },
+            ].map((item) => (
+              <div key={item.q} className="sg-glass p-6 text-left">
+                <dt className="text-lg font-bold text-white mb-2">{item.q}</dt>
+                <dd style={{ color: "#cbd5e1", lineHeight: 1.7 }}>{item.a}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
       </main>
 
       {/* Footer */}
@@ -236,6 +260,7 @@ export function LandingPage() {
               <ul className="space-y-2 text-sm" style={{ color: "#94a3b8" }}>
                 <li><button onClick={handleConnect} className="hover:text-slate-200">Connect Workspace</button></li>
                 <li><a href="#pricing" className="hover:text-slate-200">Pricing</a></li>
+                <li><a href="#faq" className="hover:text-slate-200">FAQ</a></li>
               </ul>
             </div>
             <div>

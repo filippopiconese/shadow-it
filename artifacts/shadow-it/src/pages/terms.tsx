@@ -1,6 +1,11 @@
 import { LegalLayout } from "@/components/legal-layout";
+import { useDocumentHead } from "@/hooks/use-document-head";
 
 export function Terms() {
+  useDocumentHead({
+    title: "Terms of Service",
+    description: "Terms of Service for ShadowGuard, the shadow IT detection tool for Google Workspace and Microsoft 365 by Micro SaaS.",
+  });
   return (
     <LegalLayout
       title="Terms of Service"

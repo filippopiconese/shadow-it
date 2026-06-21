@@ -1,6 +1,11 @@
 import { LegalLayout } from "@/components/legal-layout";
+import { useDocumentHead } from "@/hooks/use-document-head";
 
 export function Privacy() {
+  useDocumentHead({
+    title: "Privacy Policy",
+    description: "How ShadowGuard processes personal data when your organisation connects Google Workspace or Microsoft 365. GDPR-compliant, read-only access, no content scanning.",
+  });
   return (
     <LegalLayout
       title="Privacy Policy"

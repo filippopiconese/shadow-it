@@ -1,2 +1,11 @@
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /apps
+Disallow: /scans
+Disallow: /billing
+Disallow: /settings
+Disallow: /connect
+
+Sitemap: https://shadowit.micro-saas.it/sitemap.xml
